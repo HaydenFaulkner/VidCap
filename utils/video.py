@@ -42,6 +42,7 @@ def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-
     :param start: start frame
     :param end: end frame
     :param every: frame spacing
+    :param seconds: is the start and finish in frames or seconds
     :return: count of images saved
     """
 
@@ -54,7 +55,6 @@ def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-
     assert os.path.exists(video_path)  # assert the video file exists
 
     capture = cv2.VideoCapture(video_path)  # open the video using OpenCV
-    ll = capture.get(cv2.CAP_PROP_FRAME_COUNT)
     if seconds:
         start = int(start*capture.get(cv2.CAP_PROP_FPS))
         end = int(end*capture.get(cv2.CAP_PROP_FPS))
@@ -86,7 +86,8 @@ def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-
             while_safety = 0  # reset the safety count
             if frames_dir is not None:
                 # save in start of chunk subdirectory in video name subdirectory
-                save_path = os.path.join(frames_dir, video_filename, "{:010d}".format(start), "{:010d}.jpg".format(frame))
+                save_path = os.path.join(frames_dir, video_filename,
+                                         "{:010d}".format(start), "{:010d}.jpg".format(frame))
                 if not os.path.exists(save_path) or overwrite:  # if it doesn't exist or we want to overwrite anyways
                     cv2.imwrite(save_path, image)  # save the extracted image
                     saved_count += 1  # increment our counter by one
