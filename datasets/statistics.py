@@ -597,22 +597,22 @@ def get_missing_noun_str(dataset, noun_freqs, top, style, classes=None):
 
     output_str = "\n\n\nMissing Nouns:\n"
     c = 0
-    for key, value in sorted(((len(value), key) for (key, value) in noun_freqs.items()), reverse=True):
-        if value in classes:
+    for count, cls in sorted(((len(value), key) for (key, value) in noun_freqs.items()), reverse=True):
+        if cls in classes:
             # this exists as an object so don't count
             continue
         c += 1
         if c > top:
             break
-
+        perc = (100 * count) / len(dataset.image_ids())
         if style == "latex":
             if c % 2 == 0:
                 output_str += "\\rowcolor{lightGrey}\n"
-            output_str += "%s & %s \\\\\n" % (value, key)
+            output_str += "\\textbf{%s} & %s & %0.2f \\\\\n" % (cls, count, perc)
         elif style == "csv":
-            output_str += "%s\t%s\n" % (value, key)
+            output_str += "%s\t%s\t%0.2f\n" % (cls, count, perc)
         else:
-            output_str += "%s: %s\n" % (value, key)
+            output_str += "%s: %s (%0.2f)\n" % (cls, count, perc)
     return output_str
 
 
