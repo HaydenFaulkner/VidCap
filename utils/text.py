@@ -23,11 +23,7 @@ def syn_to_word(synset):
 
 
 def get_synonyms(synset):
-    synonyms = list()
-    for lm in synset.lemmas():
-        synonyms.append(lm.name())  # adding into synonyms
-
-    return list(set(synonyms))
+    return list(set([lm.name() for lm in synset.lemmas()]))
 
 
 def extract_nouns_verbs(sentence, unique=True):
