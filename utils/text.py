@@ -1,5 +1,4 @@
 import nltk
-import re
 
 # can comment out the 2 downloads once done...
 nltk.download('punkt')
@@ -39,8 +38,5 @@ def parse(sentence):
     :param sentence: the sentence to parse
     :return: the parsed sentence
     """
-    # re.sub(r'([^\s\w]|_)+', '', sentence)
-    # return sentence.lower()#.encode('utf-8')
-    # re.sub("^[a-zA-Z ]*$", '', sentence.lower().replace("'", ""))
     whitelist = set('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ')
     return ''.join(filter(whitelist.__contains__, sentence)).lower()
