@@ -1,7 +1,6 @@
 from tqdm import tqdm
-from nltk.corpus import wordnet as wn
 
-from utils.text import extract_nouns_verbs, parse
+from utils.text import extract_nouns_verbs, parse, id_to_syn, syn_to_word
 
 
 def get_stats(dataset, top=40, style='print'):
@@ -471,10 +470,6 @@ def obj_noun_overlaps(dataset, boxes_p_cls, noun_freqs, use_synonyms=False):
     return overlaps
 
 
-def id_to_name(id):
-    return wn.synset_from_pos_and_offset('n', int(id[1:]))._name
-
-
 def load_nouns(dataset):
     # load noun freqs for the captions
     noun_freqs = dict()
@@ -506,9 +501,9 @@ def obj_noun_overlaps_from_file(names_file, noun_freqs, use_synonyms=False):
             line = line.rstrip().split()
             child = line[0]
             parent = line[1]
-            child = id_to_name(child).split('.')[0].replace('_', ' ')
+            child = syn_to_word(id_to_syn(child)).split('.')[0].replace('_', ' ')
             if parent != 'ROOT':
-                parent = id_to_name(parent).split('.')[0].replace('_', ' ')
+                parent = syn_to_word(id_to_syn(parent)).split('.')[0].replace('_', ' ')
 
             classes.append(child)
             if parent in children:

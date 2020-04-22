@@ -1,8 +1,33 @@
 import nltk
+from nltk.corpus import wordnet
 
 # can comment out the 2 downloads once done...
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
+
+
+def id_to_syn(wn_id):
+    return wordnet.synset_from_pos_and_offset('n', int(wn_id[1:]))
+
+
+def word_to_syn(word):
+    return wordnet.synsets(word)[0]
+
+
+def syn_to_id(synset):
+    return 'n0' + str(synset.offset())
+
+
+def syn_to_word(synset):
+    return synset.name().split('.')[0]
+
+
+def get_synonyms(synset):
+    synonyms = list()
+    for lm in synset.lemmas():
+        synonyms.append(lm.name())  # adding into synonyms
+
+    return list(set(synonyms))
 
 
 def extract_nouns_verbs(sentence, unique=True):
