@@ -31,8 +31,11 @@ class MSVD(VisionDataset):
         self._splits = splits
         self._every = every
 
+        self._videos_dir = os.path.join(self.root, 'videos')
+        self._frames_dir = os.path.join(self.root, 'frames')
+
         # load the samples and labels at once
-        self.samples, self.captions, self.mappings = self._load_samples()
+        self.samples, self.captions, self.mappings, self.frames = self._load_samples()
         self.sample_ids = list(self.samples.keys())
 
     def __str__(self):
@@ -53,17 +56,17 @@ class MSVD(VisionDataset):
             numpy.ndarray: caption
             int: idx (if inference=True)
         """
-        sid = self.sample_ids[ind]
-        vid_path = self.video_path(sid)
-        cap = self.samples[sid]['cap']
+        video_id = self.sample_ids[ind]
+        frame_paths = self.frames[video_id]
+        cap = self.samples[video_id]['cap']
 
-        # imgs = extract_frames(vid_path, frames_dir=None, overwrite=False, start=-1, end=-1, every=self._every)
-        imgs = None
-        # todo may need to be numpy or something here
-        imgs = mx.nd.stack(*imgs)
+        frames = list()
+        for frame_path in frame_paths:
+            frames.append(mx.image.imread(frame_path))
+        imgs = mx.nd.stack(*frames)
 
-        # if self._transform is not None:
-        #     return self._transform(imgs, cap)
+        if self._transform is not None:
+            return self._transform(imgs, cap)
 
         if self._inference:
             return imgs, cap, ind
@@ -82,6 +85,7 @@ class MSVD(VisionDataset):
         samples = dict()
         captions = dict()
         mappings = dict()
+        frames = dict()
 
         # get the vid_id to youtube_id mappings
         with open(os.path.join(self.root, 'youtube_video_to_id_mapping.txt'), 'r') as f:
@@ -90,6 +94,12 @@ class MSVD(VisionDataset):
 
         for yt_id, vid_id in lines:
             mappings[vid_id] = yt_id
+
+            frames_dir = os.path.join(self._frames_dir, yt_id)
+            if not os.path.exists(frames_dir):
+                self.generate_frames(mappings={vid_id: yt_id})
+
+            frames[vid_id] = sorted([f for f in os.listdir(frames_dir) if f[-4:] == '.jpg'])
 
         mappings_split = dict()
         for split in self._splits:
@@ -106,7 +116,7 @@ class MSVD(VisionDataset):
                 samples[len(samples.keys())] = {'vid': vid_id, 'cap': caption}  # each individual caption is a sample
                 mappings_split[vid_id] = mappings[vid_id]
 
-        return samples, captions, mappings_split
+        return samples, captions, mappings_split, frames
 
     def image_captions(self, vid_id):
         return self.video_captions(vid_id)
@@ -130,11 +140,13 @@ class MSVD(VisionDataset):
 
         return out_str
 
-    def generate_frames(self):
-        for k, v in tqdm(self.mappings.items(), desc='Generating Frames'):
-            frames_dir = os.path.join(self.root, 'frames', v)
+    def generate_frames(self, mappings=None):
+        if mappings is None:
+            mappings = self.mappings
+        for k, v in tqdm(mappings.items(), desc='Generating Frames'):
+            frames_dir = os.path.join(self._frames_dir, v)
             os.makedirs(frames_dir, exist_ok=True)
-            video_path = os.path.join(self.root, 'videos', v + '.avi')
+            video_path = os.path.join(self._videos_dir, v + '.avi')
             extract_frames(video_path, frames_dir)
 
 
