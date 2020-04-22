@@ -2,6 +2,7 @@
 
 import mxnet as mx
 import os
+from tqdm import tqdm
 
 from gluoncv.data.base import VisionDataset
 
@@ -56,7 +57,8 @@ class MSVD(VisionDataset):
         vid_path = self.video_path(sid)
         cap = self.samples[sid]['cap']
 
-        imgs = extract_frames(vid_path, frames_dir=None, overwrite=False, start=-1, end=-1, every=self._every)
+        # imgs = extract_frames(vid_path, frames_dir=None, overwrite=False, start=-1, end=-1, every=self._every)
+        imgs = None
         # todo may need to be numpy or something here
         imgs = mx.nd.stack(*imgs)
 
@@ -128,14 +130,22 @@ class MSVD(VisionDataset):
 
         return out_str
 
+    def generate_frames(self):
+        for k, v in tqdm(self.mappings.items(), desc='Generating Frames'):
+            frames_dir = os.path.join(self.root, 'frames', v)
+            os.makedirs(frames_dir, exist_ok=True)
+            video_path = os.path.join(self.root, 'videos', v + '.avi')
+            extract_frames(video_path, frames_dir)
+
 
 if __name__ == '__main__':
     train_dataset = MSVD(splits=['train'])
+    train_dataset.generate_frames()
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
-    overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
-    print(overlaps)
-    print(missing)
+    # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
+    # print(overlaps)
+    # print(missing)
 
     # print(train_dataset.stats())
 

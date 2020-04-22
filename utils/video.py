@@ -11,27 +11,6 @@ import sys
 from tqdm import tqdm
 
 
-def print_progress(iteration, total, prefix='', suffix='', decimals=3, bar_length=100):
-    """
-    Call in a loop to create standard out progress bar
-
-    :param iteration: current iteration
-    :param total: total iterations
-    :param prefix: prefix string
-    :param suffix: suffix string
-    :param decimals: positive number of decimals in percent complete
-    :param bar_length: character length of bar
-    :return: None
-    """
-
-    format_str = "{0:." + str(decimals) + "f}"  # format the % done number string
-    percents = format_str.format(100 * (iteration / float(total)))  # calculate the % done
-    filled_length = int(round(bar_length * iteration / float(total)))  # calculate the filled bar length
-    bar = '#' * filled_length + '-' * (bar_length - filled_length)  # generate the bar string
-    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),  # write out the bar
-    sys.stdout.flush()  # flush to stdout
-
-
 def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-1, every=1, seconds=False):
     """
     Extract frames from a video using OpenCVs VideoCapture
@@ -69,6 +48,7 @@ def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-
     while_safety = 0  # a safety counter to ensure we don't enter an infinite while loop (hopefully we won't need it)
     saved_count = 0  # a count of how many frames we have saved
 
+    os.makedirs(frames_dir, exist_ok=True)
     out_frames = list()
     while frame < end:  # lets loop through the frames until the end
 
@@ -86,8 +66,7 @@ def extract_frames(video_path, frames_dir=None, overwrite=False, start=-1, end=-
             while_safety = 0  # reset the safety count
             if frames_dir is not None:
                 # save in start of chunk subdirectory in video name subdirectory
-                save_path = os.path.join(frames_dir, video_filename,
-                                         "{:010d}".format(start), "{:010d}.jpg".format(frame))
+                save_path = os.path.join(frames_dir, "{:010d}.jpg".format(frame))
                 if not os.path.exists(save_path) or overwrite:  # if it doesn't exist or we want to overwrite anyways
                     cv2.imwrite(save_path, image)  # save the extracted image
                     saved_count += 1  # increment our counter by one
@@ -118,6 +97,10 @@ def video_to_frames(video_path, frames_dir, stats_dir=None, overwrite=False, eve
     video_path = os.path.normpath(video_path)  # make the paths OS (Windows) compatible
     frames_dir = os.path.normpath(frames_dir)  # make the paths OS (Windows) compatible
 
+    if not os.path.exists(video_path):
+        print("Video doesn't exist: %s" % video_path)
+        return None
+
     video_dir, video_filename = os.path.split(video_path)  # get the video path and filename from the path
 
     capture = cv2.VideoCapture(video_path)  # load the video
@@ -128,28 +111,24 @@ def video_to_frames(video_path, frames_dir, stats_dir=None, overwrite=False, eve
     capture.release()  # release the capture straight away
 
     if total < 1:  # if video has no frames, might be and opencv error
-        print("Video has no frames. Check your OpenCV + ffmpeg installation, can't read videos!!!\n"
-              "You may need to install OpenCV by source not pip")
+        print("Video has no frames. Check your OpenCV installation.")
         return None  # return None
 
     frame_chunks = [[i, i+chunk_size] for i in range(0, total, chunk_size)]  # split the frames into chunk lists
     frame_chunks[-1][-1] = min(frame_chunks[-1][-1], total-1)  # make sure last chunk has correct end frame
 
+    frames_dir = os.path.join(frames_dir, video_filename)
+
     for frame_chunk in frame_chunks:
         # make directory to save frames, its a sub dir in the frames_dir with the video name
         # also since file systems hate lots of files in one directory, lets put separate chunks in separate directories
-        os.makedirs(os.path.join(frames_dir, video_filename, "{:010d}".format(frame_chunk[0])), exist_ok=True)
-
-    prefix_str = "Extracting frames from {}".format(video_filename)  # a prefix string to be printed in progress bar
+        frames_dir = os.path.join(frames_dir, "{:010d}".format(frame_chunk[0]))
 
     # execute across multiple cpu cores to speed up processing, get the count automatically
     with ProcessPoolExecutor(max_workers=multiprocessing.cpu_count()) as executor:
 
         futures = [executor.submit(extract_frames, video_path, frames_dir, overwrite, f[0], f[1], every)
                    for f in frame_chunks]  # submit the processes: extract_frames(...)
-
-        for i, f in enumerate(as_completed(futures)):  # as each process completes
-            print_progress(i, len(frame_chunks)-1, prefix=prefix_str, suffix='Complete')  # print it's progress
 
     if stats_dir is not None:  # if we specify a stats directory
         os.makedirs(stats_dir, exist_ok=True)  # make the directory if it doesn't already exist
