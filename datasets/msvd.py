@@ -8,6 +8,7 @@ from gluoncv.data.base import VisionDataset
 
 from datasets.statistics import get_stats, concept_overlaps
 from utils.video import extract_frames
+from utils.text import id_to_syn, syn_to_word
 
 __all__ = ['MSVD']
 
@@ -16,7 +17,7 @@ class MSVD(VisionDataset):
     """MSVD dataset."""
 
     def __init__(self, root=os.path.join('datasets', 'MSVD'),
-                 splits=['train'], transform=None, inference=False, every=25):
+                 splits=['train'], transform=None, inference=False, every=25, subset=None):
         """
         Args:
             root (str): root file path of the dataset (default is 'datasets/MSCoco')
@@ -30,6 +31,7 @@ class MSVD(VisionDataset):
         self._inference = inference
         self._splits = splits
         self._every = every
+        self._subset = subset
 
         self._videos_dir = os.path.join(self.root, 'videos')
         self._frames_dir = os.path.join(self.root, 'frames')
@@ -149,10 +151,60 @@ class MSVD(VisionDataset):
             video_path = os.path.join(self._videos_dir, v + '.avi')
             extract_frames(video_path, frames_dir)
 
+    def filter_on_objects(self):
+        with open(os.path.join('datasets', 'names', 'filtered_det.tree'), 'r') as f:
+            lines = f.readlines()
+        object_classes = set([l.split()[0] for l in lines ])
+        object_classes = set([syn_to_word(id_to_syn(wn_id)).replace('_', ' ') for wn_id in object_classes])
+
+        objects = dict()
+        for s in self.samples.values():
+            vid = s['vid']
+            cap = s['cap'].split()
+
+            words = set()
+            for i in range(len(cap)):
+                words.add(cap[i])
+                if i > 0:  # add 2 words
+                    words.add(cap[i] + ' ' + cap[i-1])
+
+            exist = set.intersection(object_classes, words)
+            if vid not in objects:
+                objects[vid] = exist
+            else:
+                objects[vid].union(exist)
+
+        print('pre removal')
+        for vid, objs in objects.items():
+            print(vid, len(objs), objs)
+
+        # remove single words that are in double words
+        for vid, objs in objects.items():
+            removes = set()
+            for obj in objs:
+                if len(obj.split()) > 1:
+                    removes.add(obj.split()[0])
+                    removes.add(obj.split()[1])
+
+            for obj in removes:
+                objects[vid].remove(obj)
+
+        print('post removal')
+        counts = dict()
+        for vid, objs in objects.items():
+            print(vid, len(objs), objs)
+            if len(objs) not in counts:
+                counts[len(objs)] = 1
+            else:
+                counts[len(objs)] += 1
+
+        print('hist counts')
+        print(counts)
+
 
 if __name__ == '__main__':
     train_dataset = MSVD(splits=['train'])
-    train_dataset.generate_frames()
+    train_dataset.filter_on_objects()
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
