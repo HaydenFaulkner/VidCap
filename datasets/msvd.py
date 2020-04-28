@@ -8,7 +8,7 @@ from gluoncv.data.base import VisionDataset
 
 from datasets.statistics import get_stats, concept_overlaps
 from utils.video import extract_frames
-from utils.text import id_to_syn, syn_to_word
+from utils.text import id_to_syn, syn_to_word, parse, extract_nouns_verbs
 
 __all__ = ['MSVD']
 
@@ -38,6 +38,11 @@ class MSVD(VisionDataset):
 
         # load the samples and labels at once
         self.samples, self.captions, self.mappings, self.frames = self._load_samples()
+
+        if subset is not None:
+            self.filter_on_objects(subset)
+
+        self.img_ids = self.mappings.keys()
         self.sample_ids = list(self.samples.keys())
 
     def __str__(self):
@@ -151,67 +156,66 @@ class MSVD(VisionDataset):
             video_path = os.path.join(self._videos_dir, v + '.avi')
             extract_frames(video_path, frames_dir)
 
-    def filter_on_objects(self):
-        with open(os.path.join('datasets', 'names', 'filtered_det.tree'), 'r') as f:
+    def filter_on_objects(self, names_file):
+        assert names_file == 'filtered_det.tree', 'only filtered_det.tree accepted at this stage'
+        with open(os.path.join('datasets', 'names', names_file), 'r') as f:
             lines = f.readlines()
-        object_classes = set([l.split()[0] for l in lines ])
+        object_classes = set([l.split()[0] for l in lines])
         object_classes = set([syn_to_word(id_to_syn(wn_id)).replace('_', ' ') for wn_id in object_classes])
 
         objects = dict()
         for s in self.samples.values():
             vid = s['vid']
-            cap = s['cap'].split()
+            # cap = s['cap'].split()
+            cap = parse(s['cap'])
+            _, nouns, _ = extract_nouns_verbs(cap)  # using nouns compared to just words gives subset aligned with stats
 
-            words = set()
-            for i in range(len(cap)):
-                words.add(cap[i])
-                if i > 0:  # add 2 words
-                    words.add(cap[i] + ' ' + cap[i-1])
-
-            exist = set.intersection(object_classes, words)
+            exist = set.intersection(object_classes, set(nouns))
             if vid not in objects:
                 objects[vid] = exist
             else:
-                objects[vid].union(exist)
+                objects[vid] = objects[vid].union(exist)
 
-        print('pre removal')
+        # need to remove these from the set
+        remove_vids = set()
         for vid, objs in objects.items():
-            print(vid, len(objs), objs)
+            if len(objs) < 1:
+                remove_vids.add(vid)
 
-        # remove single words that are in double words
-        for vid, objs in objects.items():
-            removes = set()
-            for obj in objs:
-                if len(obj.split()) > 1:
-                    removes.add(obj.split()[0])
-                    removes.add(obj.split()[1])
+        remove_samples = set()
+        for k, v in self.samples.items():
+            if v['vid'] in remove_vids:
+                remove_samples.add(k)
 
-            for obj in removes:
-                objects[vid].remove(obj)
+        for vid in remove_vids:
+            del self.captions[vid]
+            del self.mappings[vid]
+        for s in remove_samples:
+            del self.samples[s]
+        # below for debugs
+        # for vid, objs in objects.items():
+        #     print(vid, len(objs), objs)
 
-        print('post removal')
-        counts = dict()
-        for vid, objs in objects.items():
-            print(vid, len(objs), objs)
-            if len(objs) not in counts:
-                counts[len(objs)] = 1
-            else:
-                counts[len(objs)] += 1
-
-        print('hist counts')
-        print(counts)
+        # counts = dict()
+        # for vid, objs in objects.items():
+        #     print(vid, len(objs), objs)
+        #     if len(objs) not in counts:
+        #         counts[len(objs)] = 1
+        #     else:
+        #         counts[len(objs)] += 1
+        #
+        # print('hist counts', counts)
 
 
 if __name__ == '__main__':
-    train_dataset = MSVD(splits=['train'])
-    train_dataset.filter_on_objects()
+    train_dataset = MSVD(splits=['train'], subset='filtered_det.tree')
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
     # print(overlaps)
     # print(missing)
 
-    # print(train_dataset.stats())
+    print(train_dataset.stats())
 
     # for s in tqdm(train_dataset, desc='Test Pass of Training Set'):
     #     pass
