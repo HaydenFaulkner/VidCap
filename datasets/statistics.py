@@ -58,7 +58,8 @@ def get_stats(dataset, top=40, style='print'):
         sents_p_img, words_p_img, vocab_p_img, imgs_with_word, caps_with_word, word_freqs, vocab_size = \
             caption_counts(dataset)
 
-        output_str += "\n\n\n\n# Captions: %d\n" \
+        output_str += "\n\n\n\n# Images: %d\n" \
+                      "# Captions: %d\n" \
                       "# Words: %d\n" \
                       "# Nouns %d (%d%% of words)\n" \
                       "# Verbs %d (%d%% of words)\n" \
@@ -72,7 +73,8 @@ def get_stats(dataset, top=40, style='print'):
                       "Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" \
                       "Nouns Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" \
                       "Verbs Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" % \
-                      (sum(sents_p_img),
+                      (len(dataset.img_ids),
+                       sum(sents_p_img),
                        sum(words_p_img[0]),
                        sum(words_p_img[1]), int(100 * sum(words_p_img[1]) / float(sum(words_p_img[0]))),
                        sum(words_p_img[2]), int(100 * sum(words_p_img[2]) / float(sum(words_p_img[0]))),
