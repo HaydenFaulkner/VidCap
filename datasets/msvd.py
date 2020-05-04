@@ -148,8 +148,15 @@ class MSVD(VisionDataset):
         return out_str
 
     def generate_frames(self, mappings=None):
+        """
+        Generate individual frame files for this dataset
+
+        :param mappings: needed if isn't yet initialised for the object instance
+        :return: None, but saves frames in self._frames_dir
+        """
         if mappings is None:
             mappings = self.mappings
+        assert mappings is not None
         for k, v in tqdm(mappings.items(), desc='Generating Frames'):
             frames_dir = os.path.join(self._frames_dir, v)
             os.makedirs(frames_dir, exist_ok=True)
@@ -157,6 +164,12 @@ class MSVD(VisionDataset):
             extract_frames(video_path, frames_dir)
 
     def filter_on_objects(self, names_file):
+        """
+        Filter out samples that don't include an object in the tree specified in the names_file
+
+        :param names_file: the .tree file
+        :return: None, changes the object instance inner values
+        """
         assert names_file == 'filtered_det.tree', 'only filtered_det.tree accepted at this stage'
         with open(os.path.join('datasets', 'names', names_file), 'r') as f:
             lines = f.readlines()
