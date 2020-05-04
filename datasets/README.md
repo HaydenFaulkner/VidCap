@@ -103,10 +103,12 @@ train_dataset = MSVD(subset='filtered_det.tree')
 ```
 
 <h2 align='center'>Stats</h2>
-The following stats can be printed via each dataset instance's `stats()` function
+The following stats can be printed via each dataset instances `stats()` function
 
 <h3 align='center'>MSVD</h3>
+
 Train Split
+
 ```
 # Images: 1200
 # Captions: 48774
@@ -129,7 +131,9 @@ Verbs Vocab (unique words) per image (min, avg, max): 2, 15, 42
 
 
 <h3 align='center'>MSR-VTT</h3>
+
 Train Split
+
 ```
 # Images: 10000
 # Captions: 200000
