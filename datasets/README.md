@@ -47,7 +47,7 @@ VidCap$ . datasets/organise_flickr30k.sh
 ```
 
 <p align="center">If you also want <a href="https://github.com/BryanPlummer/flickr30k_entities">Flickr 30k Entities</a>, which adds 244k 
-coreference chains and 276k manually annotated bounding boxes, then follow up by running <code>get_flickr30k_entities.sh</code>:</p>
+coreference chains and 276k manually annotated bounding boxes, then follow up by running <a href="get_flickr30k_entities.sh"><code>get_flickr30k_entities.sh</code></a>:</p>
 
 ```
 VidCap$ . datasets/get_flickr30k_entities.sh
