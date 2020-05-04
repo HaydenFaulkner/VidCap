@@ -103,7 +103,8 @@ train_dataset = MSVD(subset='filtered_det.tree')
 ```
 
 <h2 align='center'>Stats</h2>
-The following stats can be printed via each dataset instances `stats()` function
+
+The following stats can be printed via each dataset instances `stats()` function:
 
 <h3 align='center'>MSVD</h3>
 
