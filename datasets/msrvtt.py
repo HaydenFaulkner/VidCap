@@ -45,6 +45,7 @@ class MSRVTT(VisionDataset):
         # load the samples and labels at once
         self.samples, self.captions, self.mappings, self.videos = self._load_samples()
 
+        # check for missing videos, potentially try and download them
         self.missing = self._check_videos()
         removed = self._remove_missing()
         if removed > 0:
@@ -52,7 +53,8 @@ class MSRVTT(VisionDataset):
         else:
             print("All videos available in %s" % self._videos_dir)
 
-        # todo add self.frames param, maybe in load samples function?
+        # generate frames
+        self.frames = self.generate_frames()
 
         if subset is not None:
             self.filter_on_objects(subset)
@@ -192,14 +194,20 @@ class MSRVTT(VisionDataset):
         :param mappings: needed if isn't yet initialised for the object instance
         :return: None, but saves frames in self._frames_dir
         """
+        frames = dict()
         if mappings is None:
             mappings = self.mappings
         assert mappings is not None
-        for k, v in tqdm(mappings.items(), desc='Generating Frames'):
-            frames_dir = os.path.join(self._frames_dir, v)
-            os.makedirs(frames_dir, exist_ok=True)
-            video_path = os.path.join(self._videos_dir, v + '.avi')
-            extract_frames(video_path, frames_dir)
+        for v_id in tqdm(mappings.keys(), desc='Generating Frames'):
+            frames_dir = os.path.join(self._frames_dir, v_id)
+            if not os.path.exists(frames_dir):
+                os.makedirs(frames_dir, exist_ok=True)
+                video_path = os.path.join(self._videos_dir, v_id + '.mp4')
+                extract_frames(video_path, frames_dir)
+
+            frames[v_id] = sorted([f for f in os.listdir(frames_dir) if f[-4:] == '.jpg'])
+
+        return frames
 
     def filter_on_objects(self, names_file):
         """
@@ -259,7 +267,7 @@ class MSRVTT(VisionDataset):
 
 
 if __name__ == '__main__':
-    train_dataset = MSRVTT(splits=['train'], subset='filtered_det.tree', download_missing=True)
+    train_dataset = MSRVTT(splits=['train'])#, subset='filtered_det.tree', download_missing=True)
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
