@@ -200,7 +200,7 @@ def download_youtube(save_dir, yt_id, v_id=None):
     if v_id is None:
         v_id = yt_id
 
-    extensions = [".mp4", ".mkv", ".mp4.webm"]
+    extensions = [".mp4"]  #, ".mkv", ".mp4.webm"]
 
     # check if it exists first
     for ext in extensions:
