@@ -186,15 +186,19 @@ def frames_to_video(frames_dir, video_path, fps=30):
     return video_path
 
 
-def download_youtube(save_dir, v_id):
+def download_youtube(save_dir, yt_id, v_id=None):
     """
     download a video from youtube
     requires youtube-dl
 
     :param save_dir: the directory to save the vids
-    :param v_id: the video id
+    :param yt_id: the youtube video id
+    :param v_id: the video id for saving, if not specified will be the yt_id
     :return: the name.ext as a string or None if download was unsuccessful
     """
+
+    if v_id is None:
+        v_id = yt_id
 
     extensions = [".mp4", ".mkv", ".mp4.webm"]
 
@@ -204,7 +208,7 @@ def download_youtube(save_dir, v_id):
             return v_id + ext
 
     os.makedirs(save_dir, exist_ok=True)
-    subprocess.run(["youtube-dl -o '" + os.path.join(save_dir, v_id + ".mp4") + "' 'http://youtu.be/" + v_id + "'"
+    subprocess.run(["youtube-dl -o '" + os.path.join(save_dir, v_id + ".mp4") + "' 'http://youtu.be/" + yt_id + "'"
                     + " --quiet --no-warnings --ignore-errors "], shell=True,
                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
