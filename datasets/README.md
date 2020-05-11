@@ -100,8 +100,8 @@ VidCap$ . datasets/get_msrvtt_dataset.sh
 
 <p align="center">To get the videos you can use the mediafire.com (<em>ew</em>) links below at your own risk:</p>
 <ul>
-<li><a href="http://download1515.mediafire.com/t1cfuz3q7tdg/s88kuv5kqywpyym/train_val_annotation.zip">train_val_annotation.zip</a></li>
-<li><a href="http://download847.mediafire.com/egekeag8fowg/wvw68y9wmo3iw80/test_videodatainfo.json.zip">test_videodatainfo.json.zip</a></li>
+<!-- <li><a href="http://download1515.mediafire.com/t1cfuz3q7tdg/s88kuv5kqywpyym/train_val_annotation.zip">train_val_annotation.zip</a></li> -->
+<!-- <li><a href="http://download847.mediafire.com/egekeag8fowg/wvw68y9wmo3iw80/test_videodatainfo.json.zip">test_videodatainfo.json.zip</a></li> -->
 <li><a href="http://download1079.mediafire.com/2xemo9i5s5jg/x3rrbe4hwp04e6w/train_val_videos.zip">train_val_videos.zip</a></li>
 <li><a href="http://download876.mediafire.com/yf43j27femyg/czh8sezbo9s4692/test_videos.zip">test_videos.zip</a></li>
 </ul>
