@@ -201,7 +201,7 @@ def download_youtube(save_dir, v_id):
     # check if it exists first
     for ext in extensions:
         if os.path.exists(os.path.join(save_dir, v_id + ext)):
-            return ''
+            return v_id + ext
 
     os.makedirs(save_dir, exist_ok=True)
     subprocess.run(["youtube-dl -o '" + os.path.join(save_dir, v_id + ".mp4") + "' 'http://youtu.be/" + v_id + "'"
@@ -211,7 +211,7 @@ def download_youtube(save_dir, v_id):
     # check we have downloaded it
     for ext in extensions:
         if os.path.exists(os.path.join(save_dir, v_id + ext)):
-            return ''
+            return v_id + ext
 
     # if didn't work will return None
-    return v_id
+    return None
