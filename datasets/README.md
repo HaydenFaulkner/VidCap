@@ -105,6 +105,9 @@ VidCap$ . datasets/get_msrvtt_dataset.sh
 <li><a href="http://download1079.mediafire.com/2xemo9i5s5jg/x3rrbe4hwp04e6w/train_val_videos.zip">train_val_videos.zip</a></li>
 <li><a href="http://download876.mediafire.com/yf43j27femyg/czh8sezbo9s4692/test_videos.zip">test_videos.zip</a></li>
 </ul>
+<p align="center">Once downloaded extract the zips and move all the videos from their split directories directly into a <code>/datasets/MSRVTT/videos/</code> directory.</p>
+
+<p align="center">Instead of this you can just instantiate an <code>MSRVTT()</code> instance with <code>download_missing=True</code>, which will try and download the videos from youtube. Note not all may be available.</p>
 
 <h2 align='center'></h2>
 <h2 align='center'>Usage</h2>
