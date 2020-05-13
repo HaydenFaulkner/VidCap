@@ -81,6 +81,7 @@ def parse_args():
     opt = parser.parse_args()
     return opt
 
+
 def read_data(opt, video_name, transform, video_utils):
 
     decord = try_import_decord()
@@ -89,7 +90,7 @@ def read_data(opt, video_name, transform, video_utils):
 
     opt.skip_length = opt.new_length * opt.new_step
     segment_indices, skip_offsets = video_utils._sample_test_indices(duration)
-
+    print(duration, segment_indices)
     if opt.video_loader:
         if opt.slowfast:
             clip_input = video_utils._video_TSN_decord_slowfast_loader(video_name, decord_vr, duration, segment_indices, skip_offsets)
@@ -179,14 +180,14 @@ def extract_video_features(logger):
     os.makedirs(save_dir, exist_ok=True)
 
     # get data
-    data_list = os.listdir(root_dir)
+    data_list = [os.path.join(root_dir, f) for f in os.listdir(root_dir) if f[-4:] in ['.mp4', '.avi']]
     logger.info('Load %d video samples.' % len(data_list))
 
     video_utils = VideoClsCustom(root=root_dir,
                                  setting=opt.data_list,
                                  num_segments=opt.num_segments,
                                  num_crop=opt.num_crop,
-                                 new_length=opt.new_length,
+                                 new_length=opt.new_length*opt.fast_temporal_stride, #trying to fix for FTS>1
                                  new_step=opt.new_step,
                                  new_width=opt.new_width,
                                  new_height=opt.new_height,
@@ -201,7 +202,7 @@ def extract_video_features(logger):
     start_time = time.time()
     for vid, vline in enumerate(data_list):
         video_path = vline.split()[0]
-        video_name = video_path.split('/')[-1]
+        video_name = video_path.split(os.sep)[-1]
         if opt.need_root:
             video_path = os.path.join(opt.data_dir, video_path)
         video_data = read_data(opt, video_path, transform_test, video_utils)
