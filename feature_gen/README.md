@@ -11,21 +11,21 @@
 ```cmd
 path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 
 ```
-<p align="center">If you want a stronger feature by covering more temporal information you can use the <code>--segments</code> argument to extract features from n segments of the video and combine them:</p>
+<p align="center">If you want a stronger feature by covering more temporal information you can use the <code>--num-segments</code> argument to extract features from n segments of the video and combine them:</p>
 
 ```cmd
-path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --segments 10
+path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --num-segments 10
 ```
 <p align="center">If you want to change the temporal length of each segment you can use the <code>--new-length</code> argument to make the segments n frames long:</p>
 
 ```cmd
-path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --segments 10 --new-length 64
+path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --num-segments 10 --new-length 64
 ```
 
 <p align="center">If you want to use three crops (either center+left+right or center+top+bottom depending on video orientation) you can use the <code>--three-crop</code> argument:</p>
 
 ```cmd
-path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --segments 10 --new-length 64 --three-crop
+path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model i3d_resnet50_v1_kinetics400 --num-segments 10 --new-length 64 --three-crop
 ```
 
 <p align="center">You can also use <a href="http://openaccess.thecvf.com/content_ICCV_2019/papers/Feichtenhofer_SlowFast_Networks_for_Video_Recognition_ICCV_2019_paper.pdf">SlowFast networks</a> models with the use of <code>slowfast_4x16_resnet50_kinetics400</code>:</p>
