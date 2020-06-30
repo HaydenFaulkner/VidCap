@@ -7,11 +7,11 @@ dependencies:
   - pip
   - matplotlib
   - pip:
-      - mxnet-cu100
+      - mxnet-cu102
       - gluoncv
       - gluonnlp
-      - tensorflow-gpu==2.0.0a0
-      - opencv-python==4.0.0.21
+      - tensorflow-gpu
+      - opencv-python
       - tqdm
       - requests
       - eventlet

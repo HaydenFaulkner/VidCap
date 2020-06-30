@@ -1,8 +1,7 @@
-mxnet-cu100
 gluoncv
 gluonnlp
-tensorflow-gpu==2.0.0a0
-opencv-python==4.0.0.21
+tensorflow-gpucook c
+opencv-python
 tqdm
 requests
 eventlet
