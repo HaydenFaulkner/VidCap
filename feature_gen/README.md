@@ -35,6 +35,14 @@ path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --m
 ```
 
 
+<h3 align='center'>.......</h3>
+<h3 align='center'>Pre-Extracted</h3>
+<p align="center">Below you can download pre-extracted features:</p>
+
+<a href="https://drive.google.com/drive/folders/1yfIAy_BIJTcUm8ktDq_eaNf-8xlU8Uks?usp=sharing">MSVD (19MB)</a> and <a href="https://drive.google.com/drive/folders/1EfU0ZXZyMNNwu6eMhPoKZ3Ev3kp3BmIc?usp=sharing">MSR-VTT (94MB)</a> using:
+```cmd
+path/to/VidCap$ python feature_gen/global/vid/feat_extract.py --dataset MSVD --model slowfast_4x16_resnet50_kinetics400 --slowfast --slow-temporal-stride 16 --fast-temporal-stride 2 --use-decord --num-segments 5 
+```
 
 <h2 align='center'></h2>
 <h2 align='center'>Image Features</h2>
