@@ -12,3 +12,4 @@ nltk
 absl-py
 tensorboardX
 pyquery
+decord

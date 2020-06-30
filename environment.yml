@@ -22,3 +22,4 @@ dependencies:
       - absl-py
       - tensorboardX
       - pyquery
+      - decord
