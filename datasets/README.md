@@ -76,38 +76,12 @@ VidCap$ . datasets/get_activitynet_dataset.sh
 <p align="center">.......</p>
 <h3 align='center'>MSVD (Video Captioning)</h3>
 
-<p align="center">Manually download the dataset from <a href="https://www.dropbox.com/sh/4ecwl7zdha60xqo/AAC_TAsR7SkEYhkSdAFKcBlMa?dl=0">dropbox</a>
- and save in a <code>MSVD</code> directory as <code>naacl15_translating_videos_processed_data.zip</code>:</p>
- 
-```
-datasets/MSVD/naacl15_translating_videos_processed_data.zip
-```
-
-<p align="center">Then run the <a href="get_msvd_dataset.sh"><code>get_msvd_dataset.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ . datasets/get_msvd_dataset.sh
-```
+<p align="center">Download this dataset from my <a href="https://drive.google.com/drive/folders/1X6yNwg_px4BrCIz1xP-rKkRUVgMMHeon?usp=sharing">Google Drive</a></p>
 
 <p align="center">.......</p>
 <h3 align='center'>MSR-VTT (Video Captioning)</h3>
  
-<p align="center">To download the training <code>.json</code> run <a href="get_msrvtt_dataset.sh"><code>get_msrvtt_dataset.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ . datasets/get_msrvtt_dataset.sh
-```
-
-<p align="center">To get the videos you can use the mediafire.com (<em>ew</em>) links below at your own risk:</p>
-<ul>
-<!-- <li><a href="http://download1515.mediafire.com/t1cfuz3q7tdg/s88kuv5kqywpyym/train_val_annotation.zip">train_val_annotation.zip</a></li> -->
-<!-- <li><a href="http://download847.mediafire.com/egekeag8fowg/wvw68y9wmo3iw80/test_videodatainfo.json.zip">test_videodatainfo.json.zip</a></li> -->
-<li><a href="http://download1079.mediafire.com/2xemo9i5s5jg/x3rrbe4hwp04e6w/train_val_videos.zip">train_val_videos.zip</a></li>
-<li><a href="http://download876.mediafire.com/yf43j27femyg/czh8sezbo9s4692/test_videos.zip">test_videos.zip</a></li>
-</ul>
-<p align="center">Once downloaded extract the zips and move all the videos from their split directories directly into a <code>/datasets/MSRVTT/videos/</code> directory.</p>
-
-<p align="center">Instead of this you can just instantiate an <code>MSRVTT()</code> instance with <code>download_missing=True</code>, which will try and download the videos from youtube. Note not all may be available.</p>
+<p align="center">Download this dataset from my <a href="https://drive.google.com/drive/folders/1eQn1e5XR8rrO2u-FPaxm1llyHSbRUfZ_?usp=sharing">Google Drive</a></p>
 
 <h2 align='center'></h2>
 <h2 align='center'>Usage</h2>
