@@ -6,11 +6,11 @@ import numpy as np
 from mxnet import nd
 from mxnet.gluon.data import dataset
 
-__all__ = ['VideoCustom']
+__all__ = ['VideoDataset']
 
 
-class VideoCustom(dataset.Dataset):
-    """Load your own video captioning dataset.
+class VideoDataset(dataset.Dataset):
+    """Load your own video dataset.
 
     Parameters
     ----------
@@ -98,7 +98,7 @@ class VideoCustom(dataset.Dataset):
                  data_aug='v1',
                  transform=None):
 
-        super(VideoCustom, self).__init__()
+        super(VideoDataset, self).__init__()
 
         from gluoncv.utils.filesystem import try_import_cv2, try_import_decord, try_import_mmcv
         self.cv2 = try_import_cv2()
