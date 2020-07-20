@@ -16,9 +16,6 @@ class VideoDataset(dataset.Dataset):
     ----------
     root : str, required.
         Path to the root folder storing the dataset.
-    setting : str, required.
-        A text file describing the dataset, each line per video sample.
-        There are three items in each line: (1) video path; (2) video length and (3) video label.
     split : str, required.
         Either of ['train', 'val', 'test']
     video_ext : str, default 'mp4'.
@@ -66,7 +63,6 @@ class VideoDataset(dataset.Dataset):
     """
     def __init__(self,
                  root,
-                 setting,
                  split='train',
                  video_ext='mp4',
                  is_color=True,
@@ -91,7 +87,6 @@ class VideoDataset(dataset.Dataset):
         from gluoncv.utils.filesystem import try_import_cv2, try_import_decord, try_import_mmcv
         self.cv2 = try_import_cv2()
         self.root = root
-        self.setting = setting
         self.split = split
         self.is_color = is_color
         self.num_segments = num_segments
@@ -112,6 +107,8 @@ class VideoDataset(dataset.Dataset):
         self.fast_temporal_stride = fast_temporal_stride
         self.data_aug = data_aug
 
+        self.videos_dir = os.path.join(root, 'videos')
+
         assert split in ['train', 'val', 'test']
 
         if self.slowfast:
@@ -124,22 +121,24 @@ class VideoDataset(dataset.Dataset):
         else:
             self.mmcv = try_import_mmcv()
 
-        self.clips = self._make_dataset(root, setting)
+        self.clips = self._make_dataset()
         if len(self.clips) == 0:
             raise(RuntimeError("Found 0 video clips in subfolders of: " + root + "\n"
                                "Check your data directory (opt.data-dir)."))
 
     def __getitem__(self, index):
 
-        directory, target = self.clips[index]
+        vid_id, target = self.clips[index]
 
-        if '.' in directory.split('/')[-1]:
+        vid_path = os.path.join(self.videos_dir, vid_id)
+
+        if '.' in vid_path.split('/')[-1]:
             # data in the "setting" file already have extension, e.g., demo.mp4
-            video_name = directory
+            video_name = vid_path
         else:
             # data in the "setting" file do not have extension, e.g., demo
             # So we need to provide extension (i.e., .mp4) to complete the file name.
-            video_name = '{}.{}'.format(directory, self.video_ext)
+            video_name = '{}.{}'.format(vid_path, self.video_ext)
         if self.use_decord:
             if self.data_aug == 'v1':
                 decord_vr = self.decord.VideoReader(video_name, width=self.new_width, height=self.new_height, num_threads=1)
@@ -159,12 +158,12 @@ class VideoDataset(dataset.Dataset):
 
         # N frames of shape H x W x C, where N = num_oversample * num_segments * new_length
         if self.slowfast:
-            clip_input = self._video_TSN_decord_slowfast_loader(directory, decord_vr, duration, segment_indices, skip_offsets)
+            clip_input = self._video_TSN_decord_slowfast_loader(vid_path, decord_vr, duration, segment_indices, skip_offsets)
         else:
             if self.use_decord:
-                clip_input = self._video_TSN_decord_batch_loader(directory, decord_vr, duration, segment_indices, skip_offsets)
+                clip_input = self._video_TSN_decord_batch_loader(vid_path, decord_vr, duration, segment_indices, skip_offsets)
             else:
-                clip_input = self._video_TSN_mmcv_loader(directory, mmcv_vr, duration, segment_indices, skip_offsets)
+                clip_input = self._video_TSN_mmcv_loader(vid_path, mmcv_vr, duration, segment_indices, skip_offsets)
 
         if self.transform is not None:
             clip_input = self.transform(clip_input)
@@ -187,18 +186,18 @@ class VideoDataset(dataset.Dataset):
     def __len__(self):
         return len(self.clips)
 
-    def _make_dataset(self, directory, setting):
-        if not os.path.exists(setting):
-            raise(RuntimeError("Setting file %s doesn't exist. Check opt.train-list and opt.val-list. " % (setting)))
+    def _make_dataset(self):
+        if not os.path.exists(self.root):
+            raise(RuntimeError("Setting file %s doesn't exist. Check opt.train-list and opt.val-list. " % (self.root)))
         clips = []
-        with open(setting) as split_f:
+        with open(self.root) as split_f:
             data = split_f.readlines()
             for line in data:
                 line_info = line.split()
                 # line format: video_path, video_label
                 if len(line_info) < 3:
                     raise(RuntimeError('Video input format is not correct, missing one or more element. %s' % line))
-                clip_path = os.path.join(directory, line_info[0])
+                clip_path = os.path.join(self.root, line_info[0])
                 target = int(line_info[2])
                 item = (clip_path, target)
                 clips.append(item)

@@ -73,7 +73,7 @@ def get_stats(dataset, top=40, style='print'):
                       "Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" \
                       "Nouns Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" \
                       "Verbs Vocab (unique words) per image (min, avg, max): %d, %d, %d\n" % \
-                      (len(dataset.img_ids),
+                      (len(dataset.image_ids()),
                        sum(sents_p_img),
                        sum(words_p_img[0]),
                        sum(words_p_img[1]), int(100 * sum(words_p_img[1]) / float(sum(words_p_img[0]))),
