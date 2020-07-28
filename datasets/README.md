@@ -1,87 +1,33 @@
 <h1 align='center'>Datasets</h1>
+The currently supported datasets are - MSVD and MSRVTT.
+
+<h2 align='center'></h2>
+<h2 align='center'>Organisation</h2>
+
+<p align="center">The datasets should be stored in the following directory structure</p>
+<pre>
+VidCap/
+└── datasets/
+    ├── ActivityNet
+    ├── Flickr30k
+    ├── MSCoco
+    ├── MSRVTT
+    ├── MSVD
+    ├── PascalVOC
+    └── # version controlled files
+</pre>
 
 <h2 align='center'></h2>
 <h2 align='center'>Downloading</h2>
-<h3 align='center'>Pascal VOC (Image Captioning)</h3>
-<p align="center">Consists of 1000 images from <a href="http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit">PascalVOC</a> with five 
-captions per image. The dataset is presented <a href="http://vision.cs.uiuc.edu/pascal-sentences/">here</a></p>
-
-<p align="center">To download run <a href="get_voc_dataset.sh"><code>get_voc_dataset.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ python datasets/get_voc_dataset.sh
-```
-
-<p align="center">The script will download the <a href="http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devki">Pascal VOC</a> dataset and 
-put the sentences into:</p>
-
-```
-datasets/PascalVOC/VOCdevkit/Sentences
-```
-
-<p align="center">.......</p>
-<h3 align='center'>Flickr 30k (Image Captioning)</h3>
-
-<p align="center">The dataset is available for <a href="https://www.kaggle.com/hsankesara/flickr-image-dataset/downloads/flickr-image-dataset.zip/1">download from 
-Kaggle</a> (requires sign in). 
-Or the official website is <a href="http://hockenmaier.cs.illinois.edu/DenotationGraph/">here</a>, but you will need to fill out a 
-form due to the copyright of the Flickr images, and the data <em>might</em> get sent to you</p>
-
-<p align="center">To organise the dataset make a <code>Flickr30k</code> directory in <code>datasets</code>:</p>
-
-```
-cd datasets
-mkdir Flickr30k
-```
-
-<p align="center"> and place the downloaded <code>flickr-image-dataset.zip</code> in it, resulting in:</p>
-
-```commandline
-datasets/Flickr30k/flickr-image-dataset.zip
-```
-
-<p align="center">Then run <a href="organise_flickr30k.sh"><code>organise_flickr30k.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ . datasets/organise_flickr30k.sh
-```
-
-<p align="center">If you also want <a href="https://github.com/BryanPlummer/flickr30k_entities">Flickr 30k Entities</a>, which adds 244k 
-coreference chains and 276k manually annotated bounding boxes, then follow up by running <a href="get_flickr30k_entities.sh"><code>get_flickr30k_entities.sh</code></a>:</p>
-
-```
-VidCap$ . datasets/get_flickr30k_entities.sh
-```
-
-<p align="center">.......</p>
-<h3 align='center'>MS Coco (Image Captioning)</h3>
-<p align="center">To download run <a href="get_coco_dataset.sh"><code>get_coco_dataset.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ . datasets/get_coco_dataset.sh
-```
-
-<p align="center">.......</p>
-<h3 align='center'>ActivityNet (Video Captioning)</h3>
-
-<p align="center">To download run <a href="get_activitynet_dataset.sh"><code>get_activitynet_dataset.sh</code></a> from the root dir:</p>
-
-```
-VidCap$ . datasets/get_activitynet_dataset.sh
-```
-
-<p align="center">This script will also attempt to download the videos from YouTube, note this can take a very long time and also that not
- all videos are still on YouTube. To get the full dataset instead you can fill out <a href="https://docs.google.com/forms/d/e/1FAIpQLSeKaFq9ZfcmZ7W0B0PbEhfbTHY41GeEgwsa7WobJgGUhn4DTQ/viewform">this form</a>.</p>
- 
-<p align="center">.......</p>
-<h3 align='center'>MSVD (Video Captioning)</h3>
-
-<p align="center">Download this dataset from my <a href="https://drive.google.com/drive/folders/1X6yNwg_px4BrCIz1xP-rKkRUVgMMHeon?usp=sharing">Google Drive</a></p>
-
-<p align="center">.......</p>
-<h3 align='center'>MSR-VTT (Video Captioning)</h3>
- 
-<p align="center">Download this dataset from my <a href="https://drive.google.com/drive/folders/1eQn1e5XR8rrO2u-FPaxm1llyHSbRUfZ_?usp=sharing">Google Drive</a></p>
+All datasets can be downloaded from my <a href="https://drive.google.com/drive/folders/1x79iF5-pRow7i5-R4qX09XEdN-VOgV5e?usp=sharing">Google Drive</a>:
+<ul>
+    <li><a href="https://drive.google.com/drive/folders/1Y3K6tWtRSM3LiadXRTsZuBOPULccIovf?usp=sharing">PascalVOC (07 + 12)</a></li>
+    <li><a href="https://drive.google.com/drive/folders/1wU6rzc7Qv1kB1LwA5XCsk8tlWICNrQiU?usp=sharing">Flickr30k</a></li>
+    <li><a href="https://drive.google.com/drive/folders/1xIsUUwSIABrI5yhrTVB4P248ysghtq4t?usp=sharing">MSCoco</a></li>
+    <li><a href="https://drive.google.com/drive/folders/1Xdt1Im4IEfuWq-404xBV2h-Sq1J4dSHA?usp=sharing">MSVD</a></li>
+    <li><a href="https://drive.google.com/drive/folders/1VUhVWhPB8NU3My4biMqQy2ff4vQEUvo3?usp=sharing">MSRVTT</a></li>
+    <li><a href="https://drive.google.com/drive/folders/1VwiCrZZa6d_oj_FM4ZmQnXT0-5sHkYOQ?usp=sharing">ActivityNet (Original + Entities + Captions)</a></li>
+</ul>
 
 <h2 align='center'></h2>
 <h2 align='center'>Usage</h2>
