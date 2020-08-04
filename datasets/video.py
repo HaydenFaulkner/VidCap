@@ -19,7 +19,7 @@ class VideoDataset(dataset.Dataset):
     split : str, required.
         Either of ['train', 'val', 'test']
     video_ext : str, default 'mp4'.
-        If video_loader is set to True, please specify the video format accordinly.
+        If video_loader is set to True, please specify the video format accordingly.
     is_color : bool, default True.
         Whether the loaded image is color or grayscale.
     num_segments : int, default 1.
@@ -112,8 +112,10 @@ class VideoDataset(dataset.Dataset):
         assert split in ['train', 'val', 'test']
 
         if self.slowfast:
-            assert slow_temporal_stride % fast_temporal_stride == 0, 'slow_temporal_stride needs to be multiples of slow_temporal_stride, please set it accordinly.'
-            assert not temporal_jitter, 'Slowfast dataloader does not support temporal jitter. Please set temporal_jitter=False.'
+            assert slow_temporal_stride % fast_temporal_stride == 0, \
+                'slow_temporal_stride needs to be multiples of slow_temporal_stride, please set it accordinly.'
+            assert not temporal_jitter, \
+                'Slowfast dataloader does not support temporal jitter. Please set temporal_jitter=False.'
             assert new_step == 1, 'Slowfast dataloader only support consecutive frames reading, please set new_step=1.'
 
         if self.use_decord:
@@ -299,7 +301,6 @@ class VideoDataset(dataset.Dataset):
         return sampled_list
 
     def _video_TSN_decord_batch_loader(self, directory, video_reader, duration, indices, skip_offsets):
-        sampled_list = []
         frame_id_list = []
         for seg_ind in indices:
             offset = int(seg_ind)
@@ -319,7 +320,6 @@ class VideoDataset(dataset.Dataset):
         return sampled_list
 
     def _video_TSN_decord_slowfast_loader(self, directory, video_reader, duration, indices, skip_offsets):
-        sampled_list = []
         frame_id_list = []
         for seg_ind in indices:
             fast_id_list = []
