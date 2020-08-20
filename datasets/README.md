@@ -47,6 +47,7 @@ train_dataset = MSVD(subset='filtered_det.tree')
 <p align="center">The following stats can be printed via each dataset instances <code>stats()</code> function:</p>
 
 <h3 align='center'>MSVD</h3>
+
 <pre>
 ---------- Training ----------
 # Clips: 1200
@@ -66,7 +67,8 @@ Verbs per image (min, avg, max): 16, 44, 120
 Vocab (unique words) per image (min, avg, max): 22, 60, 125
 Nouns Vocab (unique words) per image (min, avg, max): 5, 24, 59
 Verbs Vocab (unique words) per image (min, avg, max): 2, 15, 42
-
+</pre>
+<pre>
 ---------- Validation ----------
 # Clips: 100
 # Captions: 4290
@@ -85,7 +87,8 @@ Verbs per image (min, avg, max): 26, 46, 80
 Vocab (unique words) per image (min, avg, max): 23, 61, 106
 Nouns Vocab (unique words) per image (min, avg, max): 9, 25, 53
 Verbs Vocab (unique words) per image (min, avg, max): 4, 15, 37
-
+</pre>
+<pre>
 ---------- Testing ----------
 # Clips: 670
 # Captions: 27763
@@ -108,6 +111,7 @@ Verbs Vocab (unique words) per image (min, avg, max): 3, 15, 40
 
 
 <h3 align='center'>MSR-VTT</h3>
+
 <pre>
 ---------- Training ----------
 # Clips: 6513
@@ -127,7 +131,8 @@ Verbs per image (min, avg, max): 3, 25, 62
 Vocab (unique words) per image (min, avg, max): 15, 69, 154
 Nouns Vocab (unique words) per image (min, avg, max): 7, 29, 76
 Verbs Vocab (unique words) per image (min, avg, max): 1, 15, 42
-
+</pre>
+<pre>
 ---------- Validation ----------
 # Clips: 497
 # Captions: 9940
@@ -146,7 +151,8 @@ Verbs per image (min, avg, max): 7, 25, 49
 Vocab (unique words) per image (min, avg, max): 28, 69, 148
 Nouns Vocab (unique words) per image (min, avg, max): 8, 29, 64
 Verbs Vocab (unique words) per image (min, avg, max): 2, 15, 36
-
+</pre>
+<pre>
 ---------- Testing ----------
 # Clips: 2990
 # Captions: 59800
