@@ -1,6 +1,5 @@
 <h1 align='center'>Datasets</h1>
-The currently supported datasets are <a href="https://vsubhashini.github.io/s2vt.html">MSVD</a> and <a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/">MSRVTT</a>.
-
+<p align="center">The currently supported datasets are <a href="https://vsubhashini.github.io/s2vt.html">MSVD</a> and <a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/">MSRVTT</a>. <b>Image Captioning Sets Coming Soon</b></p>
 <h2 align='center'></h2>
 <h2 align='center'>Organisation</h2>
 
@@ -16,7 +15,6 @@ VidCap/
 
 <h2 align='center'></h2>
 <h2 align='center'>Usage</h2>
-<p align="center"><b>Image Captioning Sets Coming Soon</b></p>
 
 <p align="center">Datasets can be initialised with their corresponding class (for example for MSVD):</p>
 
