@@ -47,9 +47,6 @@ train_dataset = MSVD(subset='filtered_det.tree')
 <p align="center">The following stats can be printed via each dataset instances <code>stats()</code> function:</p>
 
 <h3 align='center'>MSVD</h3>
-
-<p align="center">Train Split</p>
-
 <pre>
 ---------- Training ----------
 # Clips: 1200
@@ -111,9 +108,6 @@ Verbs Vocab (unique words) per image (min, avg, max): 3, 15, 40
 
 
 <h3 align='center'>MSR-VTT</h3>
-
-<p align="center">Train Split</p>
-
 <pre>
 ---------- Training ----------
 # Clips: 6513
