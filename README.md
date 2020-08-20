@@ -1,14 +1,17 @@
 <h1 align='center'>VidCap</h1>
 <p align=center>
-A captioning pipeline for video written in MXNet and Gluon.
+A captioning pipeline for video written in MXNet and Gluon. Currently supports <a href="https://vsubhashini.github.io/s2vt.html">MSVD</a> and <a href="https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/">MSR-VTT</a>.
 </p>
 
-## Datasets
-Currently Supports:
-- [PascalVOC Sentences](http://vision.cs.uiuc.edu/pascal-sentences/)
-- [Flickr 30k](http://hockenmaier.cs.illinois.edu/DenotationGraph/) + [Entities](https://github.com/BryanPlummer/flickr30k_entities)
-- [MSCoco](http://cocodataset.org/#download)
-- [MSVD](https://vsubhashini.github.io/s2vt.html)
-- [MSR-VTT](https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/)
+<h2 align='center'>Datasets</h2>
+<p align=center>
+See <a href="/datasets/">datasets</a> for downloading and organisation information.
+</p>
 
-See [datasets](/datasets/) for downloading and organisation information...
+<h2 align='center'>Feature Extraction</h2>
+<p align=center>
+As an initial step it's necessary to extract feautres from the videos. See <a href="/feature_gen/">feature_gen</a> for details.
+</p>
+
+<h2 align='center'>Model</h2>
+<p align=center>Coming Soon</p>

@@ -183,7 +183,7 @@ class VideoDataset(dataset.Dataset):
         if self.new_length == 1:
             clip_input = np.squeeze(clip_input, axis=2)    # this is for 2D input case
 
-        return nd.array(clip_input), target
+        return nd.array(clip_input), target, vid_id
 
     def __len__(self):
         return len(self.clips)

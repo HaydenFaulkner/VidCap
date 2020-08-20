@@ -61,7 +61,7 @@ class MSVD(VideoDataset):
         return self.video_captions(vid_id)
 
     def video_ids(self):
-        return [v for v, c in self.clips]
+        return list(set([v for v, c in self.clips]))
 
     def image_ids(self):
         return self.video_ids()
@@ -118,14 +118,13 @@ class MSVD(VideoDataset):
 
 
 if __name__ == '__main__':
-    train_dataset = MSVD(split='train', subset='filtered_det.tree')
+
+    for split in ['train', 'val', 'test']:
+        dataset = MSVD(split=split)
+        print('-'*10 + '  ' + split + '  ' + '-'*10)
+        print(dataset.stats())
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
     # print(overlaps)
     # print(missing)
-
-    print(train_dataset.stats())
-
-    # for s in tqdm(train_dataset, desc='Test Pass of Training Set'):
-    #     pass

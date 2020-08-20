@@ -43,15 +43,31 @@ class MSRVTT(VideoDataset):
         with open(os.path.join(self.root, 'videodatainfo_2017.json'), 'r') as f:
             data = json.load(f)
 
+        # only get videos from this split  # all videos are marked train in .json
+        # split_videos = [v['video_id'] for v in data['videos'] if v['split'] == self.split]
+
+        # assume splits aren't randomised
+        if self.split == 'train':
+            split_videos = data['videos'][:6513]
+        elif self.split == 'val':
+            split_videos = data['videos'][6513:7010]
+        elif self.split == 'test':
+            split_videos = data['videos'][7010:]
+        else:
+            split_videos = list()
+
+        split_videos = [v['video_id'] for v in split_videos]
+
         # extract the caption data
         for sent in data['sentences']:
-            if sent['video_id'] in self.captions.keys():
-                self.captions[sent['video_id']].append(sent['caption'])
-            else:
-                self.captions[sent['video_id']] = [sent['caption']]
-                self.videos.append(sent['video_id'])
+            if sent['video_id'] in split_videos:
+                if sent['video_id'] in self.captions.keys():
+                    self.captions[sent['video_id']].append(sent['caption'])
+                else:
+                    self.captions[sent['video_id']] = [sent['caption']]
+                    self.videos.append(sent['video_id'])
 
-            clips.append((sent['video_id'], sent['caption']))
+                clips.append((sent['video_id'], sent['caption']))
 
         return clips
 
@@ -62,7 +78,7 @@ class MSRVTT(VideoDataset):
         return self.video_captions(vid_id)
 
     def video_ids(self):
-        return [v for v, c in self.clips]
+        return list(set([v for v, c in self.clips]))
 
     def image_ids(self):
         return self.video_ids()
@@ -119,14 +135,15 @@ class MSRVTT(VideoDataset):
 
 
 if __name__ == '__main__':
-    train_dataset = MSRVTT(split='train')#, subset='filtered_det.tree', download_missing=True)
+
+    for split in ['train', 'val', 'test']:
+        dataset = MSRVTT(split=split)
+        print('-'*10 + '  ' + split + '  ' + '-'*10)
+        print(dataset.stats())
+
+    # train_dataset = MSRVTT(split='train')#, subset='filtered_det.tree', download_missing=True)
 
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'imagenetvid.synonyms'))
     # overlaps, missing = concept_overlaps(train_dataset, os.path.join('datasets', 'names', 'filtered_det.tree'), use_synonyms=False, top=300)
     # print(overlaps)
     # print(missing)
-
-    print(train_dataset.stats())
-
-    # for s in tqdm(train_dataset, desc='Test Pass of Training Set'):
-    #     pass

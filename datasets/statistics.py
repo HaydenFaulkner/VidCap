@@ -58,7 +58,7 @@ def get_stats(dataset, top=40, style='print'):
         sents_p_img, words_p_img, vocab_p_img, imgs_with_word, caps_with_word, word_freqs, vocab_size = \
             caption_counts(dataset)
 
-        output_str += "\n\n\n\n# Images: %d\n" \
+        output_str += "\n\n\n\n# Clips: %d\n" \
                       "# Captions: %d\n" \
                       "# Words: %d\n" \
                       "# Nouns %d (%d%% of words)\n" \
