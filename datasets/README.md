@@ -8,12 +8,8 @@ The currently supported datasets are <a href="https://vsubhashini.github.io/s2vt
 <pre>
 VidCap/
 └── <a href="https://drive.google.com/drive/folders/1x79iF5-pRow7i5-R4qX09XEdN-VOgV5e?usp=sharing">datasets/</a>
-    ├── ActivityNet
-    ├── <a href="https://drive.google.com/file/d/11CBboQ49VGp1JRgWcxUcRUx-lFW_Xo5Z/view?usp=sharing">Flickr30k</a>
-    ├── <a href="https://drive.google.com/file/d/1zzvPAZGonlrdLBXXpKVV9IpbRJxYawLv/view?usp=sharing">MSCoco</a>
     ├── <a href="https://drive.google.com/file/d/1z5cu0y1e36gvlna7Qbb745X7U8LK52pB/view?usp=sharing">MSRVTT</a>
     ├── <a href="https://drive.google.com/file/d/1lM0LAf4lEb2yLIPNGRbIDUtrXp8JdFzF/view?usp=sharing">MSVD</a>
-    ├── <a href="https://drive.google.com/file/d/19_HmXUnTwL20ROs-q5e0DUmj3yM5ZXJK/view?usp=sharing">PascalVOC</a>
     └── # version controlled files
 </pre>
 
