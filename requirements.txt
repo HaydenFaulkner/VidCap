@@ -13,3 +13,4 @@ absl-py
 tensorboardX
 pyquery
 decord
+yacs

@@ -10,7 +10,7 @@ See <a href="/datasets/">datasets</a> for downloading and organisation informati
 
 <h2 align='center'>Feature Extraction</h2>
 <p align=center>
-As an initial step it's necessary to extract feautres from the videos. See <a href="/feature_gen/">feature_gen</a> for details.
+As an initial step it's necessary to extract feautres from the videos. See <a href="/features/">features</a> for details.
 </p>
 
 <h2 align='center'>Model</h2>

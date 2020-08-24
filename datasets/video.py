@@ -20,8 +20,6 @@ class VideoDataset(dataset.Dataset):
         Either of ['train', 'val', 'test']
     video_ext : str, default 'mp4'.
         If video_loader is set to True, please specify the video format accordingly.
-    is_color : bool, default True.
-        Whether the loaded image is color or grayscale.
     num_segments : int, default 1.
         Number of segments to evenly divide the video into clips.
         A useful technique to obtain global video-level information.
@@ -47,8 +45,6 @@ class VideoDataset(dataset.Dataset):
         Whether to temporally jitter if new_step > 1.
     video_loader : bool, default False.
         Whether to use video loader to load data.
-    use_decord : bool, default True.
-        Whether to use Decord video loader to load data. Otherwise use mmcv video loader.
     transform : function, default None.
         A function that takes data and label and transforms them.
     slowfast : bool, default False.
@@ -61,71 +57,47 @@ class VideoDataset(dataset.Dataset):
     data_aug : str, default 'v1'.
         Different types of data augmentation pipelines. Supports v1, v2, v3 and v4.
     """
-    def __init__(self,
-                 root,
-                 split='train',
-                 video_ext='mp4',
-                 is_color=True,
-                 num_segments=1,
-                 num_crop=1,
-                 new_length=1,
-                 new_step=1,
-                 new_width=340,
-                 new_height=256,
-                 target_width=224,
-                 target_height=224,
-                 temporal_jitter=False,
-                 use_decord=True,
-                 slowfast=False,
-                 slow_temporal_stride=16,
-                 fast_temporal_stride=2,
-                 data_aug='v1',
-                 transform=None):
+    def __init__(self, cfg, transform=None):
 
         super(VideoDataset, self).__init__()
 
-        from gluoncv.utils.filesystem import try_import_cv2, try_import_decord, try_import_mmcv
+        from gluoncv.utils.filesystem import try_import_cv2, try_import_decord
         self.cv2 = try_import_cv2()
-        self.root = root
-        self.split = split
-        self.is_color = is_color
-        self.num_segments = num_segments
-        self.num_crop = num_crop
-        self.new_height = new_height
-        self.new_width = new_width
-        self.new_length = new_length
-        self.new_step = new_step
+        self.root = cfg.DATA.ROOT
+        self.split = cfg.DATA.SPLIT
+        self.num_segments = cfg.DATA.NUM_SEGMENTS
+        self.num_crop = cfg.DATA.NUM_CROP
+        self.new_width = cfg.DATA.NEW_WIDTH
+        self.new_height = cfg.DATA.NEW_HEIGHT
+        self.new_length = cfg.DATA.NEW_LENGTH
+        self.new_step = cfg.DATA.NEW_STEP
         self.skip_length = self.new_length * self.new_step
-        self.target_height = target_height
-        self.target_width = target_width
+        self.target_height = cfg.DATA.INPUT_SIZE
+        self.target_width = cfg.DATA.INPUT_SIZE
+        self.temporal_jitter = cfg.DATA.TEMPORAL_JITTER
+        self.video_ext = cfg.DATA.EXT
+        self.slowfast = cfg.MODEL.NAME[:8] == 'slowfast'
+        self.slow_temporal_stride = cfg.MODEL.SLOW_TEMP_STRIDE
+        self.fast_temporal_stride = cfg.MODEL.FAST_TEMP_STRIDE
+        self.data_aug = cfg.DATA.AUGMENTATION
         self.transform = transform
-        self.temporal_jitter = temporal_jitter
-        self.video_ext = video_ext
-        self.use_decord = use_decord
-        self.slowfast = slowfast
-        self.slow_temporal_stride = slow_temporal_stride
-        self.fast_temporal_stride = fast_temporal_stride
-        self.data_aug = data_aug
 
-        self.videos_dir = os.path.join(root, 'videos')
+        self.videos_dir = os.path.join(self.root, 'videos')
 
-        assert split in ['train', 'val', 'test']
+        assert self.split in ['train', 'val', 'test']
 
         if self.slowfast:
-            assert slow_temporal_stride % fast_temporal_stride == 0, \
+            assert self.slow_temporal_stride % self.fast_temporal_stride == 0, \
                 'slow_temporal_stride needs to be multiples of slow_temporal_stride, please set it accordinly.'
-            assert not temporal_jitter, \
+            assert not self.temporal_jitter, \
                 'Slowfast dataloader does not support temporal jitter. Please set temporal_jitter=False.'
-            assert new_step == 1, 'Slowfast dataloader only support consecutive frames reading, please set new_step=1.'
+            assert self.new_step == 1, 'Slowfast dataloader only support consecutive frames reading, please set new_step=1.'
 
-        if self.use_decord:
-            self.decord = try_import_decord()
-        else:
-            self.mmcv = try_import_mmcv()
+        self.decord = try_import_decord()
 
         self.clips = self._make_dataset()
         if len(self.clips) == 0:
-            raise(RuntimeError("Found 0 video clips in subfolders of: " + root + "\n"
+            raise(RuntimeError("Found 0 video clips in subfolders of: " + self.root + "\n"
                                "Check your data directory (opt.data-dir)."))
 
     def __getitem__(self, index):
@@ -141,15 +113,12 @@ class VideoDataset(dataset.Dataset):
             # data in the "setting" file do not have extension, e.g., demo
             # So we need to provide extension (i.e., .mp4) to complete the file name.
             video_name = '{}.{}'.format(vid_path, self.video_ext)
-        if self.use_decord:
-            if self.data_aug == 'v1':
-                decord_vr = self.decord.VideoReader(video_name, width=self.new_width, height=self.new_height, num_threads=1)
-            else:
-                decord_vr = self.decord.VideoReader(video_name, num_threads=1)
-            duration = len(decord_vr)
+
+        if self.data_aug == 'v1':
+            decord_vr = self.decord.VideoReader(video_name, width=self.new_width, height=self.new_height, num_threads=1)
         else:
-            mmcv_vr = self.mmcv.VideoReader(video_name)
-            duration = len(mmcv_vr)
+            decord_vr = self.decord.VideoReader(video_name, num_threads=1)
+        duration = len(decord_vr)
 
         if self.split == 'train':
             segment_indices, skip_offsets = self._sample_train_indices(duration)
@@ -162,10 +131,7 @@ class VideoDataset(dataset.Dataset):
         if self.slowfast:
             clip_input = self._video_TSN_decord_slowfast_loader(vid_path, decord_vr, duration, segment_indices, skip_offsets)
         else:
-            if self.use_decord:
-                clip_input = self._video_TSN_decord_batch_loader(vid_path, decord_vr, duration, segment_indices, skip_offsets)
-            else:
-                clip_input = self._video_TSN_mmcv_loader(vid_path, mmcv_vr, duration, segment_indices, skip_offsets)
+            clip_input = self._video_TSN_decord_batch_loader(vid_path, decord_vr, duration, segment_indices, skip_offsets)
 
         if self.transform is not None:
             clip_input = self.transform(clip_input)

@@ -13,14 +13,13 @@ __all__ = ['MSRVTT']
 class MSRVTT(VideoDataset):
     """MSRVTT dataset."""
 
-    def __init__(self, root=os.path.join('datasets', 'MSRVTT'), inference=False, subset=None, *args, **kwargs):
+    def __init__(self, cfg, transform=None, inference=False, subset=None):
         """
-        Args:
-            root (str): root file path of the dataset (default is 'datasets/MSRVTT')
+        args:
             inference (bool): are we doing inference? (default is False)
             subset (str): specify an object file to only have captions that include particular objects
         """
-        super(MSRVTT, self).__init__(root, *args, **kwargs)
+        super(MSRVTT, self).__init__(cfg, transform)
 
         self.inference = inference
         self.subset = subset
@@ -136,8 +135,15 @@ class MSRVTT(VideoDataset):
 
 if __name__ == '__main__':
 
+    from features.config import config as cfg
+
+    cfg.DATA.DATASET = 'MSRVTT'
+    cfg.DATA.ROOT = os.path.join('datasets', 'MSRVTT')
+    cfg.DATA.EXT = 'mp4'
+
     for split in ['train', 'val', 'test']:
-        dataset = MSRVTT(split=split)
+        cfg.DATA.SPLIT = split
+        dataset = MSRVTT(cfg)
         print('-'*10 + '  ' + split + '  ' + '-'*10)
         print(dataset.stats())
 

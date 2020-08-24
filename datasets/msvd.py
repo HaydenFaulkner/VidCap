@@ -12,14 +12,13 @@ __all__ = ['MSVD']
 class MSVD(VideoDataset):
     """MSVD dataset."""
 
-    def __init__(self, root=os.path.join('datasets', 'MSVD'), inference=False, subset=None, *args, **kwargs):
+    def __init__(self, cfg, transform=None, inference=False, subset=None):
         """
-        Args:
-            root (str): root file path of the dataset (default is 'datasets/MSVD')
+        args:
             transform: the transform to apply to the image/video and label (default is None)
             inference (bool): are we doing inference? (default is False)
         """
-        super(MSVD, self).__init__(root, video_ext='.avi', *args, **kwargs)
+        super(MSVD, self).__init__(cfg, transform)
 
         self.inference = inference
         self.subset = subset
@@ -42,15 +41,22 @@ class MSVD(VideoDataset):
             lines = f.readlines()
         lines = [line.rstrip().split('\t') for line in lines]
 
+        with open(os.path.join(self.root, 'youtube_video_to_id_mapping.txt'), 'r') as f:
+            mapping = f.readlines()
+        mapping_tmp = [line.rstrip().split() for line in mapping]
+        mapping = dict()
+        for m in mapping_tmp:
+            mapping[m[1]] = m[0]
+
         for vid_id, caption in lines:
             if vid_id in self.captions.keys():
-                self.captions[vid_id].append(caption)
+                self.captions[mapping[vid_id]].append(caption)
             else:
-                self.captions[vid_id] = [caption]
-                self.videos.append(vid_id)
+                self.captions[mapping[vid_id]] = [caption]
+                self.videos.append(mapping[vid_id])
 
             # each caption is a separate samples
-            clips.append((vid_id, caption))
+            clips.append((mapping[vid_id], caption))
 
         return clips
 
@@ -119,8 +125,15 @@ class MSVD(VideoDataset):
 
 if __name__ == '__main__':
 
+    from features.config import config as cfg
+
+    cfg.DATA.DATASET = 'MSVD'
+    cfg.DATA.ROOT = os.path.join('datasets', 'MSVD')
+    cfg.DATA.EXT = 'avi'
+
     for split in ['train', 'val', 'test']:
-        dataset = MSVD(split=split)
+        cfg.DATA.SPLIT = split
+        dataset = MSVD(cfg)
         print('-'*10 + '  ' + split + '  ' + '-'*10)
         print(dataset.stats())
 

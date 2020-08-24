@@ -1,0 +1,5 @@
+MODEL:
+  NAME: 'slowfast_4x16_resnet50_kinetics400'
+
+DATA:
+  DATASET: MSRVTT
