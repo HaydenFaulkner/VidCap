@@ -53,7 +53,7 @@ def extract_video_features(cfg, log):
     classes = cfg.DATA.NUM_CLASSES
     model_name = cfg.MODEL.NAME
     net = get_model(name=model_name, nclass=classes, pretrained=cfg.MODEL.PRETRAINED,
-                    feat_ext=True, num_segments=cfg.DATA.NUM_SEGMENTS, num_crop=cfg.DATA.NUM_CROP)
+                    feat_ext=True, num_segments=1, num_crop=cfg.DATA.NUM_CROP)
     net.cast('float32')
     net.collect_params().reset_ctx(context)
     if cfg.MODEL.MODE == 'hybrid':

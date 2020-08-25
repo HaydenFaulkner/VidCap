@@ -8,10 +8,8 @@ _C.LOG_INTERVAL = 10
 # MODEL related params
 _C.MODEL = CN()
 _C.MODEL.NAME = 'i3d_resnet50_v1_kinetics400'
-_C.MODEL.PRETRAINED = ''
+_C.MODEL.PRETRAINED = True
 _C.MODEL.RESUME = ''
-_C.MODEL.SLOW_TEMP_STRIDE = 16
-_C.MODEL.FAST_TEMP_STRIDE = 2
 _C.MODEL.MODE = ''
 
 # DATASET related params
@@ -20,19 +18,18 @@ _C.DATA.DATASET = 'MSVD'
 _C.DATA.ROOT = 'datasets/MSVD'
 _C.DATA.EXT = 'avi'
 _C.DATA.SPLIT = 'train'
-_C.DATA.INPUT_SIZE = 224
-_C.DATA.NEW_WIDTH = 340
-_C.DATA.NEW_HEIGHT = 256
-_C.DATA.NEW_LENGTH = 32
-_C.DATA.NEW_STEP = 1
+_C.DATA.SAMPLES_TYPE = 'frames'
+_C.DATA.INPUT_SIZE = 224  # the model input size, transformed to this in the transform()
+_C.DATA.CLIP_WIDTH = 340  # the clip width as read from video reader
+_C.DATA.CLIP_HEIGHT = 256  # the clip height as read from video reader
+_C.DATA.CLIP_LENGTH = 32  # the number of frames in a window
+_C.DATA.CLIP_STEP = -1  # the step between keyframes (-1 means every realtime second dependent on FPS)
+_C.DATA.CLIP_STRIDE = 1  # the stride of frames in window
 _C.DATA.NUM_CLASSES = 400
 _C.DATA.TEN_CROP = False
 _C.DATA.THREE_CROP = False
 _C.DATA.NUM_CROP = 1
-_C.DATA.LOAD_VIDEOS = True
 _C.DATA.AUGMENTATION = 'v1'
-_C.DATA.NUM_SEGMENTS = 1
-_C.DATA.TEMPORAL_JITTER = False
 
 
 def update_config(cfg, args):

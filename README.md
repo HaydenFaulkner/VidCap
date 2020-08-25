@@ -10,8 +10,8 @@ See <a href="/datasets/">datasets</a> for downloading and organisation informati
 
 <h2 align='center'>Feature Extraction</h2>
 <p align=center>
-As an initial step it's necessary to extract feautres from the videos. See <a href="/features/">features</a> for details.
-</p>
+<p align="center">The captioning pipeline is dependent on a bunch of image and/or video features. For computational efficiency these features are pre-extracted with the <a href="generate_features.py">generate_features.py</a>. See the <a href="/features/">features</a> directory for details</p>
+
 
 <h2 align='center'>Model</h2>
 <p align=center>Coming Soon</p>

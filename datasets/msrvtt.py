@@ -33,7 +33,7 @@ class MSRVTT(VideoDataset):
     def __len__(self):
         return len(self.clips)
 
-    def _make_dataset(self):
+    def _populate_clips(self):
         clips = list()
         self.captions = dict()
         self.videos = list()
