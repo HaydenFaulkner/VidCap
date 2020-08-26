@@ -4,7 +4,7 @@
 <h2 align='center'></h2>
 <h2 align='center'>Video Features</h2>
 
-<p align="center">For <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> video features we use windows of size <b>32 frames</b> with <b>stride 1</b>, and for <a href="https://arxiv.org/abs/1812.03982">SlowFast</a> we use <b>stride 2</b>, both are <b>centred</b> around the keyframe. For <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> we extract final dense prior to classification (size 2048) layer activations while for <a href="https://arxiv.org/abs/1812.03982">SlowFast</a> we similarly extract the final dense layer prior to classification (size 2304).</p>
+<p align="center">For <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> video features we use windows of size <b>32 frames</b> with <b>stride 1</b>, and for <a href="https://arxiv.org/abs/1812.03982">SlowFast</a> we use <b>stride 2</b>, both are <b>centred</b> around the keyframe. For <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> we extract final dense prior to classification (size 2048) layer activations while for <a href="https://arxiv.org/abs/1812.03982">SlowFast</a> we similarly extract the final dense layer prior to classification (size 2304). Both the <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> and <a href="https://arxiv.org/abs/1812.03982">SlowFast</a> networks are pretrained on the <a href="https://deepmind.com/research/open-source/kinetics">Kinetics 400</a> dataset.</p>
 
 <p align="center">To extract <a href="https://arxiv.org/pdf/1705.07750.pdf">I3D</a> features from the <a href="https://vsubhashini.github.io/s2vt.html">MSVD</a> dataset you can use:</p>
 
