@@ -28,6 +28,8 @@ def main():
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+    console = logging.StreamHandler()
+    logging.getLogger('').addHandler(console)
 
     logger.info(pprint.pformat(args))
     logger.info(pprint.pformat(config))

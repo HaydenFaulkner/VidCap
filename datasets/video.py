@@ -49,12 +49,10 @@ class VideoDataset(dataset.Dataset):
         self.frames = self._populate_frames()
 
     def __getitem__(self, index):
-
-        if self.samples_type == 'clips':
-            vid_id, target = self.clips[index]
-        else:
-            vid_id, frame = self.frames[index]
-            target = None  # todo target for frames
+        vid_id, frame, target = self.samples[index]
+        sample_id = vid_id
+        if frame is not None:
+            sample_id += "_%04d" % frame
 
         vid_path = os.path.join(self.videos_dir, vid_id)
 
@@ -72,15 +70,28 @@ class VideoDataset(dataset.Dataset):
         else:
             decord_vr = self.decord.VideoReader(video_name, num_threads=1)
 
-        # get the frames for this window
-        start_frame = frame - int(self.clip_length/2.0)
-        end_frame = start_frame + self.clip_length
-        # clip the window frame indexs (temporal padding with edge duplication)
-        window_frames = [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame, end_frame, self.clip_stride))]
+        if self.samples_type is 'clips':
+            # evenly take frames from entire video
+            start_frame = int((self.video_meta[vid_id]['duration'] % self.clip_length)/2.0) + int((self.video_meta[vid_id]['duration'] / self.clip_length)/2.0)
+            end_frame = self.video_meta[vid_id]['duration'] - start_frame + 1
+            window_frames = list(range(start_frame, end_frame, int(self.video_meta[vid_id]['duration'] / self.clip_length)))
 
-        # if its the slowfast net we need to add some extras for the fast branch
-        if self.slowfast:
-            window_frames += [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame+(self.clip_stride*4), end_frame, self.clip_stride*8))]  # clip the edges
+            # if its the slowfast net we need to add some extras for the fast branch
+            if self.slowfast:
+                start_frame = int((self.video_meta[vid_id]['duration'] % (self.clip_length/8))/2.0) + int((self.video_meta[vid_id]['duration'] / (self.clip_length/8))/2.0)
+                end_frame = self.video_meta[vid_id]['duration'] - start_frame + 1
+                window_frames += list(range(start_frame, end_frame, int(self.video_meta[vid_id]['duration'] / (self.clip_length/8))))
+
+        else:
+            # get window of len self.clip_length centred around frame
+            start_frame = frame - int(self.clip_length/2.0)
+            end_frame = start_frame + self.clip_length
+            # clip the window frame indexs (temporal padding with edge duplication)
+            window_frames = [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame, end_frame, self.clip_stride))]
+
+            # if its the slowfast net we need to add some extras for the fast branch
+            if self.slowfast:
+                window_frames += [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame+(self.clip_stride*4), end_frame, self.clip_stride*8))]  # clip the edges
 
         # extract the window frames from the clip
         try:
@@ -108,30 +119,10 @@ class VideoDataset(dataset.Dataset):
         if self.clip_length == 1:
             clip_input = np.squeeze(clip_input, axis=2)
 
-        return nd.array(clip_input), target, vid_id
+        return nd.array(clip_input), target, sample_id
 
     def __len__(self):
-        if self.samples_type == 'clips':
-            return len(self.clips)
-        else:
-            return len(self.frames)
-
-    def _populate_clips(self):
-        if not os.path.exists(self.root):
-            raise(RuntimeError("Dataset root %s doesn't exist." % self.root))
-        clips = []
-        with open(self.root) as split_f:
-            data = split_f.readlines()
-            for line in data:
-                line_info = line.split()
-                # line format: video_path, video_label
-                if len(line_info) < 3:
-                    raise(RuntimeError('Video input format is not correct, missing one or more element. %s' % line))
-                clip_path = os.path.join(self.root, line_info[0])
-                target = int(line_info[2])
-                item = (clip_path, target)
-                clips.append(item)
-        return clips
+        return len(self.samples)
 
     def _populate_meta(self):
         video_meta = dict()
@@ -142,30 +133,38 @@ class VideoDataset(dataset.Dataset):
             for vid_id, dur, fps in lines:
                 video_meta[vid_id] = {'duration': int(dur), 'fps': int(fps)}
         else:
-            for vid_id in set(self.videos):
-                if vid_id not in video_meta:
-                    video_meta[vid_id] = dict()
+            for vid_id in set(self.clips):
                 vid_path = os.path.join(self.videos_dir, vid_id)
 
                 if '.' in vid_path.split('/')[-1]:
                     video_name = vid_path
                 else:
                     video_name = '{}.{}'.format(vid_path, self.video_ext)
-
-                decord_vr = self.decord.VideoReader(video_name, num_threads=1)
+                try:
+                    decord_vr = self.decord.VideoReader(video_name, num_threads=1)
+                except RuntimeError:
+                    print('Error reading %s, leaving out of dataset' % video_name)
+                    continue
+                if vid_id not in video_meta:
+                    video_meta[vid_id] = dict()
                 video_meta[vid_id]['path'] = video_name
                 video_meta[vid_id]['duration'] = len(decord_vr)
                 video_meta[vid_id]['fps'] = int(round(decord_vr.get_avg_fps()))
 
             with open(os.path.join(self.root, 'video_meta_'+self.split+'.txt'), 'w') as f:
-                for vid_id in set(self.videos):
+                for vid_id in set(video_meta.keys()):
                     f.write("%s %d %d\n" % (vid_id, video_meta[vid_id]['duration'], video_meta[vid_id]['fps']))
+
+        self.clips = list(set(video_meta.keys()))  # overwrite for case of video not being able to be read
 
         return video_meta
 
+    def _populate_clips(self):
+        return NotImplementedError
+
     def _populate_frames(self):
         frames = list()
-        for vid_id in set(self.videos):
+        for vid_id in set(self.clips):
             if self.clip_step == -1:  # one every second
                 vid_frames = list(range(self.video_meta[vid_id]['fps'], self.video_meta[vid_id]['duration'], self.video_meta[vid_id]['fps']))
             else:
@@ -174,3 +173,16 @@ class VideoDataset(dataset.Dataset):
                 frames.append((vid_id, frame))
 
         return frames
+
+    def _determine_samples(self):
+        samples = list()
+        if self.samples_type is 'clips':
+            for clip in self.clips:
+                for caption in self.captions[clip]:
+                    samples.append((clip, None, caption))
+        else:
+            for clip, frame in self.frames:
+                for caption in self.captions[clip]:
+                    samples.append((clip, frame, caption))
+
+        return samples

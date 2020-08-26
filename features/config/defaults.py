@@ -3,7 +3,7 @@ from yacs.config import CfgNode as CN
 
 _C = CN()
 _C.GPU = [0]
-_C.LOG_INTERVAL = 10
+_C.LOG_INTERVAL = 500
 
 # MODEL related params
 _C.MODEL = CN()

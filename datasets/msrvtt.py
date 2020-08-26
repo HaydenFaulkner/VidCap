@@ -21,22 +21,24 @@ class MSRVTT(VideoDataset):
         """
         super(MSRVTT, self).__init__(cfg, transform)
 
+        self.captions = self._populate_captions()
+
         self.inference = inference
         self.subset = subset
 
         if subset is not None:
             self.filter_on_objects(subset)
 
+        self.samples = self._determine_samples()
+        print()
+
     def __str__(self):
         return '\n\n' + self.__class__.__name__ + '\n'
 
     def __len__(self):
-        return len(self.clips)
+        return len(self.samples)
 
     def _populate_clips(self):
-        clips = list()
-        self.captions = dict()
-        self.videos = list()
 
         # load the json
         with open(os.path.join(self.root, 'videodatainfo_2017.json'), 'r') as f:
@@ -55,20 +57,24 @@ class MSRVTT(VideoDataset):
         else:
             split_videos = list()
 
-        split_videos = [v['video_id'] for v in split_videos]
-
-        # extract the caption data
-        for sent in data['sentences']:
-            if sent['video_id'] in split_videos:
-                if sent['video_id'] in self.captions.keys():
-                    self.captions[sent['video_id']].append(sent['caption'])
-                else:
-                    self.captions[sent['video_id']] = [sent['caption']]
-                    self.videos.append(sent['video_id'])
-
-                clips.append((sent['video_id'], sent['caption']))
+        clips = [v['video_id'] for v in split_videos]
 
         return clips
+
+    def _populate_captions(self):
+        captions = dict()
+
+        with open(os.path.join(self.root, 'videodatainfo_2017.json'), 'r') as f:
+            data = json.load(f)
+
+        for sent in data['sentences']:
+            if sent['video_id'] in self.clips:
+                if sent['video_id'] in captions.keys():
+                    captions[sent['video_id']].append(sent['caption'])
+                else:
+                    captions[sent['video_id']] = [sent['caption']]
+
+        return captions
 
     def video_captions(self, vid_id):
         return self.captions[vid_id]
@@ -77,7 +83,7 @@ class MSRVTT(VideoDataset):
         return self.video_captions(vid_id)
 
     def video_ids(self):
-        return list(set([v for v, c in self.clips]))
+        return self.clips
 
     def image_ids(self):
         return self.video_ids()

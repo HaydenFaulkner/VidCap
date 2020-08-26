@@ -80,11 +80,11 @@ def extract_video_features(cfg, log):
     log.info('Load %d video samples.' % len(dataset))
 
     start_time = time.time()
-    for i, (video, cap, video_id) in enumerate(dataset):
+    for i, (video, cap, sample_id) in enumerate(dataset):
         video_input = video.as_in_context(context)
         video_feat = net(video_input.astype('float32', copy=False))
 
-        np.save(os.path.join(save_dir,  video_id), video_feat.asnumpy())
+        np.save(os.path.join(save_dir,  sample_id), video_feat.asnumpy())
 
         if i > 0 and i % cfg.LOG_INTERVAL == 0:
             log.info('%04d/%04d is done' % (i, len(dataset)))
