@@ -3,3 +3,5 @@ MODEL:
 
 DATA:
   DATASET: MSRVTT
+  ROOT: 'datasets/MSRVTT'
+  EXT: 'mp4'
