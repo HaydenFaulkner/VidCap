@@ -36,7 +36,7 @@ class VideoDataset(dataset.Dataset):
         self.videos_dir = os.path.join(self.root, 'videos')
 
         assert self.split in ['train', 'val', 'test']
-        assert self.samples_type in ['clips', 'frames']
+        assert self.samples_type in ['clips', 'frames', 'captions']
 
         self.decord = try_import_decord()
 
@@ -178,11 +178,15 @@ class VideoDataset(dataset.Dataset):
         samples = list()
         if self.samples_type is 'clips':
             for clip in self.clips:
+                samples.append((clip, None, None))
+        elif self.samples_type is 'frames':
+            for clip, frame in self.frames:
+                samples.append((clip, frame, None))
+        elif self.samples_type is 'captions':
+            for clip in self.clips:
                 for caption in self.captions[clip]:
                     samples.append((clip, None, caption))
         else:
-            for clip, frame in self.frames:
-                for caption in self.captions[clip]:
-                    samples.append((clip, frame, caption))
+            return NotImplementedError
 
         return samples
