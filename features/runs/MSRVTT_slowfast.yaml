@@ -5,3 +5,5 @@ DATA:
   DATASET: MSRVTT
   ROOT: 'datasets/MSRVTT'
   EXT: 'mp4'
+  CLIP_LENGTH: 64  # the number of frames in a window (will be divided by CLIP_STRIDE)
+  CLIP_STRIDE: 2  # the stride of frames in window
