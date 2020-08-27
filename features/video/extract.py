@@ -65,29 +65,32 @@ def extract_video_features(cfg, log):
         log.info('Pre-trained model is successfully loaded from the model zoo.')
     log.info("Successfully built model {}".format(model_name))
 
-    # build a pseudo dataset instance to use its children class methods
-    if cfg.DATA.DATASET == 'MSVD':
-        dataset = MSVD(cfg, transform=transform_test)
-    elif cfg.DATA.DATASET == 'MSRVTT':
-        dataset = MSRVTT(cfg, transform=transform_test)
-    else:
-        return NotImplementedError
-
-    save_dir = os.path.join('datasets', cfg.DATA.DATASET, 'features', 'video', model_name)
-    os.makedirs(save_dir, exist_ok=True)
-
-    # get data
-    log.info('Load %d video samples.' % len(dataset))
-
     start_time = time.time()
-    for i, (video, cap, sample_id) in enumerate(dataset):
-        video_input = video.as_in_context(context)
-        video_feat = net(video_input.astype('float32', copy=False))
+    for split in ['train', 'val', 'test']:
+        log.info('%s split' % split)
+        cfg.DATA.SPLIT = split
+        # build a pseudo dataset instance to use its children class methods
+        if cfg.DATA.DATASET == 'MSVD':
+            dataset = MSVD(cfg, transform=transform_test)
+        elif cfg.DATA.DATASET == 'MSRVTT':
+            dataset = MSRVTT(cfg, transform=transform_test)
+        else:
+            return NotImplementedError
 
-        np.save(os.path.join(save_dir,  sample_id), video_feat.asnumpy())
+        save_dir = os.path.join('datasets', cfg.DATA.DATASET, 'features', 'video', model_name)
+        os.makedirs(save_dir, exist_ok=True)
 
-        if i > 0 and i % cfg.LOG_INTERVAL == 0:
-            log.info('%04d/%04d is done' % (i, len(dataset)))
+        # get data
+        log.info('Load %d video samples.' % len(dataset))
+
+        for i, (video, cap, sample_id) in enumerate(dataset):
+            video_input = video.as_in_context(context)
+            video_feat = net(video_input.astype('float32', copy=False))
+
+            np.save(os.path.join(save_dir,  sample_id), video_feat.asnumpy())
+
+            if i > 0 and i % cfg.LOG_INTERVAL == 0:
+                log.info('%04d/%04d is done' % (i, len(dataset)))
 
     end_time = time.time()
     log.info('Total feature extraction time is %4.2f minutes' % ((end_time - start_time) / 60))
