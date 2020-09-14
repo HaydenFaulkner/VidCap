@@ -52,9 +52,27 @@ class VideoDataset(dataset.Dataset):
     def __getitem__(self, index):
         vid_id, frame, target = self.samples[index]
         sample_id = vid_id
-        if frame is not None:
+        if isinstance(frame, int):
             sample_id += "_%04d" % frame
 
+        ########################## FEATURES #############################
+        # extract the window frames from the clip - either features or video
+        if len(self.feature_list) > 0:
+            features = list()
+            for feature_name in self.feature_list:
+                if isinstance(frame, int):
+                    features.append(np.squeeze(np.load(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))))
+                else:
+                    frames = frame
+                    features_frame = list()
+                    for frame in frames:
+                        features_frame.append(np.squeeze(np.load(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))))
+                    features.append(np.vstack(features_frame))
+                    frame = frames
+            # features = np.concatenate(features)
+            return features, target, sample_id
+
+        ######################### RAW IMG/CLIPS #########################
         vid_path = os.path.join(self.videos_dir, vid_id)
 
         if '.' in vid_path.split('/')[-1]:
@@ -88,45 +106,39 @@ class VideoDataset(dataset.Dataset):
             if self.slowfast:
                 window_frames += [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame+(self.clip_stride*4), end_frame, self.clip_stride*8))]  # clip the edges
 
-        # extract the window frames from the clip - either features or video
-        if len(self.feature_list) > 0:
-            features = list()
-            for feature_name in self.feature_list:
-                features.append(np.squeeze(np.load(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))))
-            # features = np.concatenate(features)
-            return features, target, sample_id
-        else:
-            try:
-                # augment the data?
-                if self.data_aug == 'v1':
-                    decord_vr = self.decord.VideoReader(video_name, width=self.clip_width, height=self.clip_height, num_threads=1)
-                else:
-                    decord_vr = self.decord.VideoReader(video_name, num_threads=1)
-                video_data = decord_vr.get_batch(window_frames).asnumpy()
-                clip_input = [video_data[vid, :, :, :] for vid, _ in enumerate(window_frames)]
-            except:
-                raise RuntimeError('Error occured in reading frames {} from video {} of duration {}.'.format(window_frames, vid_id, self.video_meta[vid_id]['duration']))
 
-            # perform any specified transforms
-            if self.transform is not None:
-                clip_input = self.transform(clip_input)
 
-            # some input transforms
-            if self.slowfast:
-                sparse_samples = len(clip_input) // self.num_crop
-                clip_input = np.stack(clip_input, axis=0)
-                clip_input = clip_input.reshape((-1,) + (sparse_samples, 3, self.target_height, self.target_width))
-                clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+        try:
+            # augment the data?
+            if self.data_aug == 'v1':
+                decord_vr = self.decord.VideoReader(video_name, width=self.clip_width, height=self.clip_height, num_threads=1)
             else:
-                clip_input = np.stack(clip_input, axis=0)
-                clip_input = clip_input.reshape((-1,) + (self.clip_length, 3, self.target_height, self.target_width))
-                clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+                decord_vr = self.decord.VideoReader(video_name, num_threads=1)
+            video_data = decord_vr.get_batch(window_frames).asnumpy()
+            clip_input = [video_data[vid, :, :, :] for vid, _ in enumerate(window_frames)]
+        except:
+            raise RuntimeError('Error occured in reading frames {} from video {} of duration {}.'.format(window_frames, vid_id, self.video_meta[vid_id]['duration']))
 
-            # squeeze for 2D input case
-            if self.clip_length == 1:
-                clip_input = np.squeeze(clip_input, axis=2)
+        # perform any specified transforms
+        if self.transform is not None:
+            clip_input = self.transform(clip_input)
 
-            return nd.array(clip_input), target, sample_id
+        # some input transforms
+        if self.slowfast:
+            sparse_samples = len(clip_input) // self.num_crop
+            clip_input = np.stack(clip_input, axis=0)
+            clip_input = clip_input.reshape((-1,) + (sparse_samples, 3, self.target_height, self.target_width))
+            clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+        else:
+            clip_input = np.stack(clip_input, axis=0)
+            clip_input = clip_input.reshape((-1,) + (self.clip_length, 3, self.target_height, self.target_width))
+            clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+
+        # squeeze for 2D input case
+        if self.clip_length == 1:
+            clip_input = np.squeeze(clip_input, axis=2)
+
+        return nd.array(clip_input), target, sample_id
 
     def __len__(self):
         return len(self.samples)
@@ -182,17 +194,23 @@ class VideoDataset(dataset.Dataset):
         return frames
 
     def _determine_samples(self):
+        frames = dict()
+        for clip, frame in self.frames:
+            if clip not in frames:
+                frames[clip] = []
+            frames[clip].append(frame)
+
         samples = list()
         if self.samples_type is 'clips':
             for clip in self.clips:
-                samples.append((clip, None, None))
+                samples.append((clip, frames[clip], self.captions[clip]))
         elif self.samples_type is 'frames':
             for clip, frame in self.frames:
-                samples.append((clip, frame, None))
+                samples.append((clip, frame, self.captions[clip]))
         elif self.samples_type is 'captions':
             for clip in self.clips:
                 for caption in self.captions[clip]:
-                    samples.append((clip, None, caption))
+                    samples.append((clip, frames[clip], caption))
         else:
             return NotImplementedError
 
@@ -201,6 +219,12 @@ class VideoDataset(dataset.Dataset):
     def _check_features_exist(self):
         for feature_name in self.feature_list:
             for vid_id, frame, cap in self.samples:
-                if not os.path.exists(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame))):
-                    raise FileNotFoundError(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))
+                if isinstance(frame, int):
+                    if not os.path.exists(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame))):
+                        raise FileNotFoundError(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))
+                else:
+                    frames = frame
+                    for frame in frames:
+                        if not os.path.exists(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame))):
+                            raise FileNotFoundError(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))
         print('All features exist! :D')

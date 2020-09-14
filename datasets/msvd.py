@@ -155,6 +155,7 @@ if __name__ == '__main__':
     cfg.DATA.ROOT = os.path.join('datasets', 'MSVD')
     cfg.DATA.EXT = 'avi'
     cfg.DATA.FEATURES = ['slowfast_4x16_resnet50_kinetics400', 'i3d_resnet50_v1_kinetics400']
+    cfg.DATA.SAMPLES_TYPE = 'captions'
 
     for split in ['train', 'val', 'test']:
         cfg.DATA.SPLIT = split
