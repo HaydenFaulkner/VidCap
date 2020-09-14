@@ -77,7 +77,7 @@ def extract_video_features(cfg, log):
         else:
             return NotImplementedError
 
-        save_dir = os.path.join('datasets', cfg.DATA.DATASET, 'features', 'video', model_name)
+        save_dir = os.path.join('datasets', cfg.DATA.DATASET, 'features', model_name)
         os.makedirs(save_dir, exist_ok=True)
 
         # get data
