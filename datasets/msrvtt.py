@@ -30,7 +30,10 @@ class MSRVTT(VideoDataset):
             self.filter_on_objects(subset)
 
         self.samples = self._determine_samples()
-        print()
+
+        if len(self.feature_list) > 0:
+            print('Checking feature files exist...')
+            self._check_features_exist()
 
     def __str__(self):
         return '\n\n' + self.__class__.__name__ + '\n'

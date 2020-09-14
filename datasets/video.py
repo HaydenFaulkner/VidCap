@@ -20,6 +20,7 @@ class VideoDataset(dataset.Dataset):
         self.root = cfg.DATA.ROOT
         self.split = cfg.DATA.SPLIT
         self.samples_type = cfg.DATA.SAMPLES_TYPE
+        self.feature_list = cfg.DATA.FEATURES
         self.num_crop = cfg.DATA.NUM_CROP
         self.clip_width = cfg.DATA.CLIP_WIDTH
         self.clip_height = cfg.DATA.CLIP_HEIGHT
@@ -64,12 +65,6 @@ class VideoDataset(dataset.Dataset):
             # So we need to provide extension (i.e., .mp4) to complete the file name.
             video_name = '{}.{}'.format(vid_path, self.video_ext)
 
-        # augment the data?
-        if self.data_aug == 'v1':
-            decord_vr = self.decord.VideoReader(video_name, width=self.clip_width, height=self.clip_height, num_threads=1)
-        else:
-            decord_vr = self.decord.VideoReader(video_name, num_threads=1)
-
         if self.samples_type is 'clips':
             # evenly take frames from entire video
             start_frame = int((self.video_meta[vid_id]['duration'] % self.clip_length)/2.0) + int((self.video_meta[vid_id]['duration'] / self.clip_length)/2.0)
@@ -93,33 +88,45 @@ class VideoDataset(dataset.Dataset):
             if self.slowfast:
                 window_frames += [max(min(v, self.video_meta[vid_id]['duration']-1), 1) for v in list(range(start_frame+(self.clip_stride*4), end_frame, self.clip_stride*8))]  # clip the edges
 
-        # extract the window frames from the clip
-        try:
-            video_data = decord_vr.get_batch(window_frames).asnumpy()
-            clip_input = [video_data[vid, :, :, :] for vid, _ in enumerate(window_frames)]
-        except:
-            raise RuntimeError('Error occured in reading frames {} from video {} of duration {}.'.format(window_frames, vid_id, self.video_meta[vid_id]['duration']))
-
-        # perform any specified transforms
-        if self.transform is not None:
-            clip_input = self.transform(clip_input)
-
-        # some input transforms
-        if self.slowfast:
-            sparse_samples = len(clip_input) // self.num_crop
-            clip_input = np.stack(clip_input, axis=0)
-            clip_input = clip_input.reshape((-1,) + (sparse_samples, 3, self.target_height, self.target_width))
-            clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+        # extract the window frames from the clip - either features or video
+        if len(self.feature_list) > 0:
+            features = list()
+            for feature_name in self.feature_list:
+                features.append(np.squeeze(np.load(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))))
+            # features = np.concatenate(features)
+            return features, target, sample_id
         else:
-            clip_input = np.stack(clip_input, axis=0)
-            clip_input = clip_input.reshape((-1,) + (self.clip_length, 3, self.target_height, self.target_width))
-            clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+            try:
+                # augment the data?
+                if self.data_aug == 'v1':
+                    decord_vr = self.decord.VideoReader(video_name, width=self.clip_width, height=self.clip_height, num_threads=1)
+                else:
+                    decord_vr = self.decord.VideoReader(video_name, num_threads=1)
+                video_data = decord_vr.get_batch(window_frames).asnumpy()
+                clip_input = [video_data[vid, :, :, :] for vid, _ in enumerate(window_frames)]
+            except:
+                raise RuntimeError('Error occured in reading frames {} from video {} of duration {}.'.format(window_frames, vid_id, self.video_meta[vid_id]['duration']))
 
-        # squeeze for 2D input case
-        if self.clip_length == 1:
-            clip_input = np.squeeze(clip_input, axis=2)
+            # perform any specified transforms
+            if self.transform is not None:
+                clip_input = self.transform(clip_input)
 
-        return nd.array(clip_input), target, sample_id
+            # some input transforms
+            if self.slowfast:
+                sparse_samples = len(clip_input) // self.num_crop
+                clip_input = np.stack(clip_input, axis=0)
+                clip_input = clip_input.reshape((-1,) + (sparse_samples, 3, self.target_height, self.target_width))
+                clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+            else:
+                clip_input = np.stack(clip_input, axis=0)
+                clip_input = clip_input.reshape((-1,) + (self.clip_length, 3, self.target_height, self.target_width))
+                clip_input = np.transpose(clip_input, (0, 2, 1, 3, 4))
+
+            # squeeze for 2D input case
+            if self.clip_length == 1:
+                clip_input = np.squeeze(clip_input, axis=2)
+
+            return nd.array(clip_input), target, sample_id
 
     def __len__(self):
         return len(self.samples)
@@ -190,3 +197,10 @@ class VideoDataset(dataset.Dataset):
             return NotImplementedError
 
         return samples
+
+    def _check_features_exist(self):
+        for feature_name in self.feature_list:
+            for vid_id, frame, cap in self.samples:
+                if not os.path.exists(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame))):
+                    raise FileNotFoundError(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))
+        print('All features exist! :D')

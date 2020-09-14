@@ -29,7 +29,10 @@ class MSVD(VideoDataset):
             self.filter_on_objects(subset)
 
         self.samples = self._determine_samples()
-        print()
+
+        if len(self.feature_list) > 0:
+            print('Checking feature files exist...')
+            self._check_features_exist()
 
     def __str__(self):
         return '\n\n' + self.__class__.__name__ + '\n'
@@ -151,10 +154,14 @@ if __name__ == '__main__':
     cfg.DATA.DATASET = 'MSVD'
     cfg.DATA.ROOT = os.path.join('datasets', 'MSVD')
     cfg.DATA.EXT = 'avi'
+    cfg.DATA.FEATURES = ['slowfast_4x16_resnet50_kinetics400', 'i3d_resnet50_v1_kinetics400']
 
     for split in ['train', 'val', 'test']:
         cfg.DATA.SPLIT = split
         dataset = MSVD(cfg)
+        for d in dataset:
+            print(d)
+            break
         print('-'*10 + '  ' + split + '  ' + '-'*10)
         print(dataset.stats())
 
