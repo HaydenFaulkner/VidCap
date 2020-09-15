@@ -21,17 +21,18 @@ class VideoDataset(dataset.Dataset):
         self.split = cfg.DATA.SPLIT
         self.samples_type = cfg.DATA.SAMPLES_TYPE
         self.feature_list = cfg.DATA.FEATURES
-        self.num_crop = cfg.DATA.NUM_CROP
-        self.clip_width = cfg.DATA.CLIP_WIDTH
-        self.clip_height = cfg.DATA.CLIP_HEIGHT
-        self.clip_length = cfg.DATA.CLIP_LENGTH
         self.clip_step = cfg.DATA.CLIP_STEP
-        self.clip_stride = cfg.DATA.CLIP_STRIDE
-        self.target_height = cfg.DATA.INPUT_SIZE
-        self.target_width = cfg.DATA.INPUT_SIZE
-        self.video_ext = cfg.DATA.EXT
-        self.slowfast = cfg.MODEL.NAME[:8] == 'slowfast'
-        self.data_aug = cfg.DATA.AUGMENTATION
+        if len(self.feature_list) < 1:
+            self.num_crop = cfg.DATA.NUM_CROP
+            self.clip_width = cfg.DATA.CLIP_WIDTH
+            self.clip_height = cfg.DATA.CLIP_HEIGHT
+            self.clip_length = cfg.DATA.CLIP_LENGTH
+            self.clip_stride = cfg.DATA.CLIP_STRIDE
+            self.target_height = cfg.DATA.INPUT_SIZE
+            self.target_width = cfg.DATA.INPUT_SIZE
+            self.video_ext = cfg.DATA.EXT
+            self.slowfast = cfg.MODEL.NAME[:8] == 'slowfast'
+            self.data_aug = cfg.DATA.AUGMENTATION
         self.transform = transform
 
         self.videos_dir = os.path.join(self.root, 'videos')
@@ -50,6 +51,13 @@ class VideoDataset(dataset.Dataset):
         self.frames = self._populate_frames()
 
     def __getitem__(self, index):
+        if isinstance(index, list):
+            index = index[0]
+            # shards = list()
+            # for i in index:
+            #     shards.append(self[i])  # this is recursive
+            # return shards
+
         vid_id, frame, target = self.samples[index]
         sample_id = vid_id
         if isinstance(frame, int):
@@ -70,7 +78,8 @@ class VideoDataset(dataset.Dataset):
                     features.append(np.vstack(features_frame))
                     frame = frames
             # features = np.concatenate(features)
-            return features, target, sample_id
+            target = self.transform(target)
+            return features[0], target, len(features[0]), len(target), index
 
         ######################### RAW IMG/CLIPS #########################
         vid_path = os.path.join(self.videos_dir, vid_id)
@@ -235,3 +244,18 @@ class VideoDataset(dataset.Dataset):
             for caption in self.captions[clip]:
                 words += caption.split(' ')
         return words
+
+    def get_captions(self):
+        captions = []
+        for clip in self.clips:
+            for caption in self.captions[clip]:
+                captions.append(caption)
+        return captions
+
+    def get_seq_lengths(self):
+        lens = list()
+        for i in range(len(self)):
+            _, frame, cap = self.samples[i]
+            lens.append([len(frame), len(self.transform(cap))])
+
+        return lens
