@@ -228,3 +228,10 @@ class VideoDataset(dataset.Dataset):
                         if not os.path.exists(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame))):
                             raise FileNotFoundError(os.path.join(self.root, 'features', feature_name, "%s_%04d.npy" % (vid_id, frame)))
         print('All features exist! :D')
+
+    def get_word_list(self):
+        words = []
+        for clip in self.clips:
+            for caption in self.captions[clip]:
+                words += caption.split(' ')
+        return words
