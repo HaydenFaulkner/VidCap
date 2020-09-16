@@ -105,7 +105,6 @@ def parse_args():
 def main():
     args = parse_args()
     head = '%(asctime)-15s %(message)s'
-    os.makedirs(os.path.join('runs', 'logs'), exist_ok=True)
     config.SAVE_DIR = os.path.join('runs', os.path.basename(args.cfg[:-5]))
     os.makedirs(config.SAVE_DIR, exist_ok=True)
     logging.basicConfig(filename=os.path.join(config.SAVE_DIR, 'training_log.txt'), format=head)
@@ -362,7 +361,7 @@ def train(cfg, logger):
 
     valid_loss, valid_translation_out = evaluate(ctx[0], val_data_loader, model, test_loss_function, translator, vocab)
 
-    valid_bleu_score, _, _, _, _ = compute_bleu([val_tgt_sentences], valid_translation_out,
+    valid_bleu_score, _, _, _, _ = compute_bleu([[v.split() for v in val_tgt_sentences]], valid_translation_out,
                                                 tokenized=tokenized, tokenizer='tweaked', bpe=bpe,
                                                 split_compound_word=split_compound_word)
     logger.info('Best model valid Loss={:.4f}, valid ppl={:.4f}, valid bleu={:.2f}'
@@ -371,7 +370,7 @@ def train(cfg, logger):
     # run on test set
     test_loss, test_translation_out = evaluate(ctx[0], test_data_loader, model, test_loss_function, translator, vocab)
 
-    test_bleu_score, _, _, _, _ = compute_bleu([test_tgt_sentences], test_translation_out,
+    test_bleu_score, _, _, _, _ = compute_bleu([[v.split() for v in test_tgt_sentences]], test_translation_out,
                                                tokenized=tokenized, tokenizer='tweaked', bpe=bpe,
                                                split_compound_word=split_compound_word)
     logger.info('Best model test Loss={:.4f}, test ppl={:.4f}, test bleu={:.2f}'
