@@ -4,7 +4,7 @@ import os
 import pprint
 
 from features.config import config, update_config
-from features.video.extract import extract_video_features
+from features.video import extract_video_features
 
 
 def parse_args():
