@@ -316,11 +316,12 @@ def train(cfg, logger):
                 log_start_time = time.time()
                 log_avg_loss = 0
                 log_wc = 0
+
         mx.nd.waitall()
 
         valid_loss, valid_translation_out = evaluate(ctx[0], val_data_loader, model, test_loss_function, translator, vocab)
 
-        valid_bleu_score, _, _, _, _ = compute_bleu([val_tgt_sentences], valid_translation_out,
+        valid_bleu_score, _, _, _, _ = compute_bleu([[v.split() for v in val_tgt_sentences]], valid_translation_out,
                                                     tokenized=tokenized, tokenizer='tweaked',
                                                     split_compound_word=split_compound_word,
                                                     bpe=bpe)

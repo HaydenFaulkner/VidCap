@@ -3,3 +3,6 @@ DATA:
   CLIP_LENGTH: 64  # the number of frames in a window (will be divided by CLIP_STRIDE)
   CLIP_STRIDE: 2  # the stride of frames in window
   FEATURES: ['slowfast_4x16_resnet50_kinetics400']
+
+TRAIN:
+  LR: 0.01
